@@ -26,17 +26,22 @@ namespace Common
     {
         return (Type)std::strtof(str, end);
     }
-    
 
-    template< typename Type >
-    bool BuiltinFromString( const char *str, size_t len, Type &value )
+    void removeSpaces( const char *&str, size_t &len )
     {
         while (std::isspace(*str) && len > 0) {
             str++;
             len--;
         }
         while (len > 0 && std::isspace(str[len-1])) --len;
-    
+    }
+
+    template< typename Type >
+    COMMON_API bool BuiltinFromString( const char *str, size_t len, Type &value )
+    {
+        removeSpaces(str, len);
+
+        // Make sure the string is null terminated
         if (len > 31) return false;
 
         char buff[32];
@@ -49,8 +54,10 @@ namespace Common
     }
 
     template<>
-    bool BuiltinFromString<bool>( const char *str, size_t len, bool &value ) 
+    COMMON_API bool BuiltinFromString<bool>( const char *str, size_t len, bool &value ) 
     {
+        removeSpaces(str, len);
+
         if (StringUtils::equal(str, len, "true", StringUtils::EqualFlags::IgnoreCase) ||
             StringUtils::equal(str, len, "1", StringUtils::EqualFlags::IgnoreCase)) 
         {
@@ -66,16 +73,16 @@ namespace Common
     }
 
 
-    template bool BuiltinFromString<int>( const char *str, size_t len, int &value );
-    template bool BuiltinFromString<unsigned>( const char *str, size_t len, unsigned &value );
+    template COMMON_API bool BuiltinFromString<int>( const char *str, size_t len, int &value );
+    template COMMON_API bool BuiltinFromString<unsigned>( const char *str, size_t len, unsigned &value );
 
 
-    template bool BuiltinFromString<int32_t>( const char *str, size_t len, int32_t &value );
-    template bool BuiltinFromString<uint32_t>( const char *str, size_t len, uint32_t &value );
+    template COMMON_API bool BuiltinFromString<int32_t>( const char *str, size_t len, int32_t &value );
+    template COMMON_API bool BuiltinFromString<uint32_t>( const char *str, size_t len, uint32_t &value );
     
 
-    template bool BuiltinFromString<float>( const char *str, size_t len, float &value );
-    template bool BuiltinFromString<double>( const char *str, size_t len, double &value );
+    template COMMON_API bool BuiltinFromString<float>( const char *str, size_t len, float &value );
+    template COMMON_API bool BuiltinFromString<double>( const char *str, size_t len, double &value );
     
 
 }

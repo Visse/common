@@ -1,5 +1,6 @@
 #pragma once
 
+#include "build_config.h"
 
 #if defined(__GNUC__) || defined(__GNUG__)
 #   define NO_RETURN __attribute__ ((noreturn))
@@ -15,13 +16,13 @@
 
 
 namespace internal {
-    void NO_RETURN fatal_error( const char *format, ... ) PRINTF_FORMAT(1, 2);
-    void error( const char *format, ... ) PRINTF_FORMAT(1, 2);
-    void warning( const char *format, ... ) PRINTF_FORMAT(1, 2);
-    void information( const char *format, ... ) PRINTF_FORMAT(1, 2);
-    void performance( const char *format, ... ) PRINTF_FORMAT(1, 2);
+    COMMON_API void NO_RETURN fatal_error( const char *format, ... ) PRINTF_FORMAT(1, 2);
+    COMMON_API void error( const char *format, ... ) PRINTF_FORMAT(1, 2);
+    COMMON_API void warning( const char *format, ... ) PRINTF_FORMAT(1, 2);
+    COMMON_API void information( const char *format, ... ) PRINTF_FORMAT(1, 2);
+    COMMON_API void performance( const char *format, ... ) PRINTF_FORMAT(1, 2);
 
-    void NO_RETURN assert_failed( const char *condition, const char *format, ... ) PRINTF_FORMAT(2, 3); 
+    COMMON_API void NO_RETURN assert_failed( const char *condition, const char *format, ... ) PRINTF_FORMAT(2, 3); 
 }
 
 

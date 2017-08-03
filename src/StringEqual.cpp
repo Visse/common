@@ -4,7 +4,7 @@
 
 namespace StringUtils
 {
-    bool equal( const char *str1, size_t len1, const char *str2, size_t len2, EqualFlags flags )
+    COMMON_API bool equal( const char *str1, size_t len1, const char *str2, size_t len2, EqualFlags flags )
     {
         if (len1 != len2) return false;
 
@@ -20,7 +20,7 @@ namespace StringUtils
         
     }
 
-    bool startsWith( const char *str, size_t len, const char *start, size_t startLen, EqualFlags flags )
+    COMMON_API bool startsWith( const char *str, size_t len, const char *start, size_t startLen, EqualFlags flags )
     {
         if (len < startLen) return false;
         return equal(str, startLen, start, startLen, flags);

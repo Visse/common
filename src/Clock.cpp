@@ -1,11 +1,13 @@
 #include "Clock.h"
 
+namespace
+{
+    Clock::TimePoint ClockStartPoint = Clock::ClockType::now();
+}
 
-Clock::TimePoint Clock::StartPoint = Clock::ClockType::now();
-
-uint64_t Clock::GetMSecSinceStart() {
+COMMON_API uint64_t Clock::GetMSecSinceStart() {
     typedef std::chrono::duration<uint64_t,std::milli> MilliDur; 
     return std::chrono::duration_cast<MilliDur>(
-        ClockType::now() - StartPoint
+        ClockType::now() - ClockStartPoint
     ).count();
 }

@@ -132,3 +132,78 @@ struct WrappedHandle<Type*,tag, Deleter, Null> {
         }                                           \
     };                                              \
     WRAP_HANDLE(Name, Type, _##Name##_Deleter, Null)
+
+
+template< typename Type, typename Tag, typename Traits, Type Null >
+struct RefcountedHandle {
+    Type handle = Null;
+
+    RefcountedHandle() = default;
+    ~RefcountedHandle() {
+        if( handle != Null ) {
+            Traits::dec(handle);
+        }
+    }
+
+    explicit RefcountedHandle( Type handle_ ) : 
+        handle(handle_)
+    {
+        if (handle != Null) {
+            Traits::inc(handle);
+        }
+    }
+
+    RefcountedHandle( const RefcountedHandle &copy ) {
+        if (copy.handle != Null) {
+            Traits::inc(copy.handle);
+            handle = copy.handle;
+        }
+    }
+    RefcountedHandle& operator = ( const RefcountedHandle &copy )
+    {
+        if (handle != Null) {
+            Traits::dec(handle);
+            handle = Null;
+        }
+        if (copy.handle != Null) {
+            Traits::inc(copy.handle);
+            handle = copy.handle;
+        }
+        return *this;
+    }
+    
+    RefcountedHandle( RefcountedHandle &&move ) {
+        std::swap( handle, move.handle );
+    }
+
+    RefcountedHandle& operator = ( RefcountedHandle &&move ) {
+        std::swap( handle, move.handle );
+        return *this;
+    }
+    
+    operator bool () const {
+        return handle != Null;
+    }
+    explicit operator Type () const {
+        return handle;
+    }
+
+    friend bool operator == ( const RefcountedHandle &lhs, const RefcountedHandle &rhs ) {
+        return lhs.handle == rhs.handle;
+    }
+    friend bool operator != ( const RefcountedHandle &lhs, const RefcountedHandle &rhs ) {
+        return lhs.handle != rhs.handle;
+    }
+};
+
+#define WRAP_REFCOUNTED_HANDLE(Name, Type, Traits, Null) struct _##Name##_tag; using Name = RefcountedHandle<Type, _##Name##_tag, Traits, Null>
+#define WRAP_REFCOUNTED_HANDLE_FUNC(Name, Type, Inc, Dec, Null) \
+    struct _##Name##_Traits {                                   \
+        static void inc(Type handle) {                          \
+            Inc(handle);                                        \
+        }                                                       \
+        static void dec(Type handle) {                          \
+            Dec(handle);                                        \
+        }                                                       \
+    };                                                          \
+    WRAP_REFCOUNTED_HANDLE(Name, Type, _##Name##_Traits, Null)

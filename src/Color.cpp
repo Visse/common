@@ -3,7 +3,7 @@
 
 namespace Common
 {
-    Color Color::FromHVS( uint8_t h, uint8_t v, uint8_t s )
+    COMMON_API Color Color::FromHVS( uint8_t h, uint8_t v, uint8_t s )
     {
         if( s == 0 ) {
             return Color( v, v, v );

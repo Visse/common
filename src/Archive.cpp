@@ -47,6 +47,11 @@ namespace Common
         {
             return nullptr;
         }
+
+        virtual const char* name()
+        {
+            return "";
+        }
     };
     
     template< typename Impl >
@@ -106,6 +111,12 @@ namespace Common
 
                 return info->content.data();
             }
+
+            virtual const char* name() override
+            {
+                return path.c_str();
+            }
+
         };
 
         Archive OpenArchive( const std::string &path )
@@ -147,7 +158,7 @@ namespace Common
             Impl() = default;
             Impl(Impl&&) = default;
 
-
+            std::string path;
             ArchiveHeader header;
             std::vector<FileInfo> fileTable;
             std::vector<uint8_t> fileData;
@@ -192,6 +203,11 @@ namespace Common
 
                 assert (fileInfo.offset < fileData.size() && (fileInfo.offset+fileInfo.size) < fileData.size());
                 return fileData.data() + fileInfo.offset;
+            }
+
+            virtual const char* name() override
+            {
+                return path.c_str();
             }
         };
         
@@ -291,6 +307,7 @@ namespace Common
             }
 
             Impl impl;
+            impl.path = path;
             impl.header = header;
             impl.fileTable = std::move(files);
             impl.fileData = std::move(data);
@@ -299,7 +316,7 @@ namespace Common
         }
     }
     
-    Archive Archive::OpenArchive( const std::string &path )
+    COMMON_API Archive Archive::OpenArchive( const std::string &path )
     {
         if (FileUtils::isDirectory(path)) {
             return Directory::OpenArchive(path);
@@ -330,7 +347,32 @@ namespace Common
         return Archive {};
     }
 
-    Archive::Archive() = default;
-    Archive::Archive( Archive &&move ) = default;
-    Archive::~Archive() = default;
+    COMMON_API Archive::Archive() = default;
+    COMMON_API Archive::Archive( Archive &&move ) = default;
+    COMMON_API Archive::~Archive() = default;
+
+    COMMON_API ArchiveFileHandleRAII Archive::openFile( const std::string &file )
+    {
+        return ArchiveFileHandleRAII(this, mImpl->openFile(file));
+    }
+
+    COMMON_API void Archive::closeFile( ArchiveFileHandle handle )
+    {
+        mImpl->closeFile(handle);
+    }
+
+    COMMON_API size_t Archive::fileSize( ArchiveFileHandle handle )
+    {
+        return mImpl->fileSize(handle);
+    }
+
+    COMMON_API const void* Archive::mapFile( ArchiveFileHandle handle )
+    {
+        return mImpl->mapFile(handle);
+    }
+
+    COMMON_API const char* Archive::name()
+    {
+        return mImpl->name();
+    }
 }

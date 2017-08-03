@@ -1,5 +1,7 @@
 #pragma once
 
+#include "build_config.h"
+
 #include <cstdint>
 
 namespace Common
@@ -21,18 +23,20 @@ namespace Common
                 (unsigned)rhs.a * (unsigned)lhs.a / 255u
             );
         }
-
-        static Color FromHVS( uint8_t hue, uint8_t value, uint8_t saturation );
+        
+        COMMON_API Color FromHVS( uint8_t hue, uint8_t value, uint8_t saturation );
     };
 
     namespace NamedColors
     {
+        COMMON_API
         extern const Color PreMulAlpha50,
                            PreMulAlpha100,
                            PreMulAlpha150,
                            PreMulAlpha200;
 
         // HTML color names, from: https://www.w3schools.com/colors/colors_names.asp
+        COMMON_API
         extern const Color AliceBlue,
                            AntiqueWhite,
                            Aqua,

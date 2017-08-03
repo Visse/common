@@ -8,6 +8,7 @@ add_library( Common SHARED
     Throw.h
     HandleType.h
     EnumFlagOp.h
+    build_config.h
     
     StringFormat.h
     src/StringFormat.cpp
@@ -38,12 +39,12 @@ add_library( Common SHARED
     DataUnion.h
 
     StringId.h
+    src/StringId.cpp
 
     Color.h
     src/Color.cpp
 
     CommandLineParse.h
-    src/CommandLineParse.cpp
 
     BuiltinFromString.h
     src/BuiltinFromString.cpp
@@ -55,9 +56,21 @@ add_library( Common SHARED
 
     Archive.h
     src/Archive.cpp
+
+    MemStreamBuf.h
+
+    BuiltinCast.h
 )
 target_link_libraries(Common
-    PRIVATE libstb
+    PRIVATE stb
     PRIVATE tinydir
     PRIVATE lz4
+    PRIVATE mgn
 )
+
+target_compile_definitions(Common
+    PUBLIC COMMON_BUILT_SHARED
+    PRIVATE COMMON_BUILDING
+)
+
+add_subdirectory(tests)

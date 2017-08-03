@@ -1,11 +1,13 @@
 #pragma once
 
+#include "build_config.h"
+
 #include <string>
 #include <cstdarg>
 
 namespace StringUtils 
 {
-    std::string vprintf( const char *format, std::va_list args );
+    COMMON_API std::string vprintf( const char *format, std::va_list args );
     
 #ifdef __GNUC__
     __attribute__((format(printf,1,2)))

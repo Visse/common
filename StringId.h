@@ -1,21 +1,34 @@
 #pragma once
 
-#include "Murmur3_32.h"
 #include "HandleType.h"
+#include "build_config.h"
 
+#include <cstdint>
 #include <cstring>
 
 namespace Common
 {
-    MAKE_HANDLE(StringId, uint32_t);
-
-    inline StringId CreateStringId( const char *str, uint32_t len) {
-        return StringId{murmur3_32(str, len)};
+    namespace internal
+    {
+        COMMON_API void incRef( uint64_t id );
+        COMMON_API void decRef( uint64_t id );
     }
 
-    inline StringId CreateStringId( const char *str ) {
-        return CreateStringId(str, (uint32_t)strlen(str));
+    WRAP_REFCOUNTED_HANDLE_FUNC(StringId, uint64_t, internal::incRef, internal::decRef, 0);
+
+    COMMON_API StringId CreateStringId( const char *str, size_t len);
+    COMMON_API const char* GetCString( StringId id );
+
+
+    inline StringId CreateStringId( const char *str )
+    {
+        return CreateStringId(str, strlen(str));
     }
+
+    template< int N >
+    StringId CreateStringId( const char (&str)[N] ) {
+        return CreateStringId(str, N);
+   } 
 }
 
 namespace std

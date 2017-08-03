@@ -1,20 +1,17 @@
 #pragma once
 
+#include "build_config.h"
 #include <chrono>
 
 /// @todo check if windows provides a good chrono clock.
 class Clock {
+public:
     typedef std::chrono::high_resolution_clock ClockType;
     typedef ClockType::time_point TimePoint;
     typedef TimePoint::duration Duration;
     typedef std::chrono::duration<double> Second;
 
-
-private:
-    static TimePoint StartPoint;
-    
-public:
-    static uint64_t GetMSecSinceStart();
+    static COMMON_API uint64_t GetMSecSinceStart();
     
 public:
     void start() {

@@ -57,7 +57,7 @@ namespace internal
         log("[%0u:%02u:%03u]\t", minutes, seconds, msecs);
     }
 
-    void NO_RETURN fatal_error( const char* format, ... )
+    void COMMON_API NO_RETURN fatal_error( const char* format, ... )
     {
         {
             ColorLock lock( Error );
@@ -77,7 +77,7 @@ namespace internal
         std::exit( 1 );
     }
     
-    void error(const char* format, ...)
+    void COMMON_API  error(const char* format, ...)
     {
         ColorLock lock( Error );
         printTimeStamp();
@@ -92,7 +92,7 @@ namespace internal
 //         raise( SIGTRAP );
     }
 
-    void warning(const char* format, ...)
+    void COMMON_API warning(const char* format, ...)
     {
         ColorLock lock( Warning );
         printTimeStamp();
@@ -107,7 +107,7 @@ namespace internal
 //         raise( SIGTRAP );
     }
     
-    void information(const char* format, ...)
+    void COMMON_API information(const char* format, ...)
     {
         ColorLock lock( Information );
         printTimeStamp();
@@ -120,7 +120,7 @@ namespace internal
         std::fflush( stderr );
     }
     
-    void performance(const char* format, ...)
+    void COMMON_API performance(const char* format, ...)
     {
         ColorLock lock( Performance );
         printTimeStamp();
@@ -133,7 +133,7 @@ namespace internal
         std::fflush( stderr );
     }
 
-    void NO_RETURN assert_failed( const char *condition, const char *format, ... )
+    void COMMON_API NO_RETURN assert_failed( const char *condition, const char *format, ... )
     {
         {
             ColorLock lock( Error );
