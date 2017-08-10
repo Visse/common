@@ -73,4 +73,15 @@ target_compile_definitions(Common
     PRIVATE COMMON_BUILDING
 )
 
+
+file(GLOB COMMON_HEADERS ./*.h)
+install( TARGETS Common
+    EXPORT Zodiac
+    RUNTIME DESTINATION bin/$<CONFIG>
+    ARCHIVE DESTINATION lib/$<CONFIG>
+    INCLUDES DESTONATION include
+)
+install(FILES ${COMMON_HEADERS} DESTINATION include/Common)
+
+
 add_subdirectory(tests)
