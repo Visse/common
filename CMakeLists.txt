@@ -58,8 +58,8 @@ add_library( Common SHARED
     src/Archive.cpp
 
     MemStreamBuf.h
-
     BuiltinCast.h
+    EnumString.h
 )
 target_link_libraries(Common
     PRIVATE stb

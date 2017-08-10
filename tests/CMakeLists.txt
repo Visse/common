@@ -51,6 +51,9 @@ target_link_libraries( HandleVector Common )
 create_test( Variant Variant.cpp )
 target_link_libraries( Variant Common )
 
+create_test(EnumString EnumString.cpp)
+target_link_libraries(EnumString Common)
+
 add_custom_command(TARGET BUILD_TESTS POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:Common>
