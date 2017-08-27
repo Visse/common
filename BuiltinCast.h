@@ -8,7 +8,7 @@ To builtin_cast( From from )
 {
     static_assert( std::is_fundamental<From>::value && std::is_fundamental<To>::value, "To or From isn't builtin type!");
 
-    FATAL_ASSERT(std::numeric_limits<To>::min() <= from && from <= std::numeric_limits<To>::max(), "Value out of range!");
+    FATAL_ASSERT(std::numeric_limits<To>::lowest() >= from && from <= std::numeric_limits<To>::max(), "Value out of range!");
     return static_cast<To>(from);
 }
 
