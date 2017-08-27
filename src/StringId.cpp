@@ -52,7 +52,7 @@ namespace Common
     
     const char* GetCString( StringId id )
     {
-        const char *str = strpool_cstr(strpool, id);
+        const char *str = strpool_cstr(strpool, id.handle);
         if (str) return str;
         return "";
     }
