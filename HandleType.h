@@ -1,6 +1,26 @@
 #pragma once
 
 
+#define _HANDLE_COMPARE_OPERATIONS(Type)                \
+    friend bool operator == (Type lhs, Type rhs) {      \
+        return lhs.handle == rhs.handle;                \
+    }                                                   \
+    friend bool operator != (Type lhs, Type rhs) {      \
+        return lhs.handle != rhs.handle;                \
+    }                                                   \
+    friend bool operator < (Type lhs, Type rhs) {       \
+        return lhs.handle < rhs.handle;                 \
+    }                                                   \
+    friend bool operator > (Type lhs, Type rhs) {       \
+        return lhs.handle > rhs.handle;                 \
+    }                                                   \
+    friend bool operator <= (Type lhs, Type rhs) {      \
+        return lhs.handle <= rhs.handle;                \
+    }                                                   \
+    friend bool operator >= (Type lhs, Type rhs) {      \
+        return lhs.handle >= rhs.handle;                \
+    }
+    
 struct BaseHandle {};
 
 template< typename Type, typename Tag >
@@ -21,16 +41,8 @@ struct HandleType : public BaseHandle
     explicit operator bool () const {
         return handle != Type(0);
     }
-        
-    friend bool operator == ( HandleType lhs, HandleType rhs ) {
-        return lhs.handle == rhs.handle;
-    }
-    friend bool operator != ( HandleType lhs, HandleType rhs ) {
-        return lhs.handle != rhs.handle;
-    }
-    friend bool operator < ( HandleType lhs, HandleType rhs ) {
-        return lhs.handle < rhs.handle;
-    }
+
+    _HANDLE_COMPARE_OPERATIONS(HandleType);
 };
 
 #define MAKE_HANDLE( Name, Type ) struct _##Name##_tag; using Name = HandleType<Type, _##Name##_tag>
@@ -63,7 +75,7 @@ struct WrappedHandle {
         return *this;
     }
     
-    operator bool () const {
+    explicit operator bool () const {
         return handle != Null;
     }
     operator Type () const {
@@ -76,6 +88,7 @@ struct WrappedHandle {
         return tmp;
     }
 
+    _HANDLE_COMPARE_OPERATIONS(WrappedHandle);
 };
 
 
@@ -105,7 +118,7 @@ struct WrappedHandle<Type*,tag, Deleter, Null> {
         return *this;
     }
 
-    operator bool () const {
+    explicit operator bool () const {
         return handle != Null;
     }
     operator Type* () const {
@@ -121,6 +134,8 @@ struct WrappedHandle<Type*,tag, Deleter, Null> {
     Type* operator -> () {
         return handle;
     }
+
+    _HANDLE_COMPARE_OPERATIONS(WrappedHandle);
 };
 
 
@@ -181,19 +196,14 @@ struct RefcountedHandle {
         return *this;
     }
     
-    operator bool () const {
+    explicit operator bool () const {
         return handle != Null;
     }
     explicit operator Type () const {
         return handle;
     }
-
-    friend bool operator == ( const RefcountedHandle &lhs, const RefcountedHandle &rhs ) {
-        return lhs.handle == rhs.handle;
-    }
-    friend bool operator != ( const RefcountedHandle &lhs, const RefcountedHandle &rhs ) {
-        return lhs.handle != rhs.handle;
-    }
+    
+    _HANDLE_COMPARE_OPERATIONS(const RefcountedHandle&);
 };
 
 #define WRAP_REFCOUNTED_HANDLE(Name, Type, Traits, Null) struct _##Name##_tag; using Name = RefcountedHandle<Type, _##Name##_tag, Traits, Null>
@@ -207,3 +217,5 @@ struct RefcountedHandle {
         }                                                       \
     };                                                          \
     WRAP_REFCOUNTED_HANDLE(Name, Type, _##Name##_Traits, Null)
+
+#undef _HANDLE_COMPARE_OPERATIONS
