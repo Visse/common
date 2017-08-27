@@ -27,7 +27,7 @@ public:
     template< typename DerivedType, typename... Args>
     PImplHelper( DerivedConstructorTag<DerivedType>, Args&&... args ) {
         static_assert(std::is_base_of<Impl, DerivedType>::value, "DerivedType isn't derived from Impl!");
-        static_assert(std::has_virtual_destructor<DerivedType>::value, "DerivedType must have a virtual destructor!");
+        static_assert(std::has_virtual_destructor<Impl>::value, "Impl must have a virtual destructor!");
         
         CheckSizeAndAlign<sizeof(DerivedType), alignof(DerivedType)>();
 
