@@ -80,7 +80,7 @@ namespace Common
         struct Impl;
 
     private:
-        PImplHelper<Impl, 256> mImpl;
+        PImplHelper<Impl, 256, alignof(void*), PImplHelperFlags::AllocDerivedMove> mImpl;
     };
 
     inline ArchiveFileHandleRAII::~ArchiveFileHandleRAII() {

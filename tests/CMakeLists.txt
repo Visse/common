@@ -53,6 +53,10 @@ target_link_libraries( Variant Common )
 create_test(EnumString EnumString.cpp)
 target_link_libraries(EnumString Common)
 
+create_test(PImplHelper PImplHelper.cpp)
+target_link_libraries(PImplHelper Common)
+
+
 add_custom_command(TARGET BUILD_TESTS POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:Common>
