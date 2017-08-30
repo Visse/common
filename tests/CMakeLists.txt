@@ -13,7 +13,6 @@ function( create_test name )
     set_target_properties( ${name} PROPERTIES
        FOLDER "Tests"
        EXCLUDE_FROM_ALL TRUE
-       EXCLUDE_FROM_DEFAULT_BUILD TRUE
     )
     if (TARGET BUILD_TESTS)
         add_dependencies(BUILD_TESTS ${name})
