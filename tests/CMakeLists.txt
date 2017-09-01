@@ -56,6 +56,9 @@ target_link_libraries(EnumString Common)
 create_test(PImplHelper PImplHelper.cpp)
 target_link_libraries(PImplHelper Common)
 
+create_test(FlatMap FlatMap.cpp)
+target_link_libraries(FlatMap Common)
+
 
 add_custom_command(TARGET BUILD_TESTS POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different

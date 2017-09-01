@@ -60,6 +60,8 @@ add_library( Common SHARED
     MemStreamBuf.h
     BuiltinCast.h
     EnumString.h
+
+    FlatMap.h
 )
 target_link_libraries(Common
     PRIVATE stb
