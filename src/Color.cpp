@@ -34,10 +34,15 @@ namespace Common
 
     namespace NamedColors
     {
+        const Color PreMulAlpha25(25,25,25,25);
         const Color PreMulAlpha50(50,50,50,50);
+        const Color PreMulAlpha75(75,75,75,75);
         const Color PreMulAlpha100(100,100,100,100);
+        const Color PreMulAlpha125(125,125,125,125);
         const Color PreMulAlpha150(150,150,150,150);
+        const Color PreMulAlpha175(175,175,175,175);
         const Color PreMulAlpha200(200,200,200,200);
+        const Color PreMulAlpha225(225,225,225,225);
 
         const Color AliceBlue(240,248,255);
         const Color AntiqueWhite(250,235,215);

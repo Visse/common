@@ -30,10 +30,15 @@ namespace Common
     namespace NamedColors
     {
         COMMON_API
-        extern const Color PreMulAlpha50,
+        extern const Color PreMulAlpha25,
+                           PreMulAlpha50,
+                           PreMulAlpha75,
                            PreMulAlpha100,
+                           PreMulAlpha125,
                            PreMulAlpha150,
-                           PreMulAlpha200;
+                           PreMulAlpha175,
+                           PreMulAlpha200,
+                           PreMulAlpha225;
 
         // HTML color names, from: https://www.w3schools.com/colors/colors_names.asp
         COMMON_API
