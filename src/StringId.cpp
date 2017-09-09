@@ -1,5 +1,5 @@
 #include "StringId.h"
-#include "strpool.h"
+#include "mgn/strpool.h"
 
 
 #include "ErrorUtils.h"
