@@ -62,6 +62,9 @@ add_library( Common SHARED
     EnumString.h
 
     FlatMap.h
+
+    HashTable.h
+    src/HashTable.cpp
 )
 target_link_libraries(Common
     PRIVATE stb

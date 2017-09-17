@@ -64,6 +64,9 @@ target_link_libraries(PImplHelper Common)
 create_test(FlatMap FlatMap.cpp)
 target_link_libraries(FlatMap Common)
 
+create_test(HashTable HashTable.cpp)
+target_link_libraries(HashTable Common)
+
 
 add_custom_command(TARGET BUILD_TESTS POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
