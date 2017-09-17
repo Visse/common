@@ -65,6 +65,8 @@ add_library( Common SHARED
 
     HashTable.h
     src/HashTable.cpp
+
+    IntrusiveList.h
 )
 target_link_libraries(Common
     PRIVATE stb

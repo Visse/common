@@ -67,6 +67,9 @@ target_link_libraries(FlatMap Common)
 create_test(HashTable HashTable.cpp)
 target_link_libraries(HashTable Common)
 
+create_test(IntrusiveList IntrusiveList.cpp)
+target_link_libraries(IntrusiveList Common)
+
 
 add_custom_command(TARGET BUILD_TESTS POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
