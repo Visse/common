@@ -9,6 +9,11 @@ function( create_test name )
     add_executable( ${name} ${ARGN} )
     add_test( NAME ${name} COMMAND ${name} )
     target_link_libraries( ${name} catch )
+ 
+    add_custom_command( TARGET ${name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Common> $<TARGET_FILE_DIR:${name}>/$<TARGET_FILE_NAME:Common>
+        COMMENT "Copying $<TARGET_FILE_NAME:Common>"
+    )
     
     set_target_properties( ${name} PROPERTIES
        FOLDER "Tests"
