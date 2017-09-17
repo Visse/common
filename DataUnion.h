@@ -55,6 +55,18 @@
         _DATA_UNION_POST                                                \
     }
 
+// Same as CREATE_DATA_UNION, but allows default construction with the argument list Default
+#define CREATE_DATA_UNION_DEFAULT( Name, TypeEnum, Default, ... )       \
+    union Name {                                                        \
+        _DATA_UNION_PRE                                                 \
+        TypeEnum type;                                                  \
+        Name() : Default {}                                             \
+        PP_UTILS_MAP(Name, _DATA_UNION_MEMBERS, __VA_ARGS__)            \
+        PP_UTILS_MAP(Name, _DATA_UNION_CONSTRUCTOR, __VA_ARGS__)        \
+        _DATA_UNION_POST                                                \
+    }
+
+
 
 
 #define _CREATE_DATA_STRUCT_MEMBERS_1( Type, Name ) Type Name;
@@ -69,7 +81,7 @@
             TypeEnum type = TypeEnum::Name;         \
             PP_UTILS_MAP(Name, _CREATE_DATA_STRUCT_MEMBERS, __VA_ARGS__) \
         };                                          \
-        inline Name##Data Name( PP_UTILS_MAP(Name, _CREATE_DATA_STRUCT_FUNC_ARGS, __VA_ARGS__) int _=0 ) { \
+        static inline Name##Data Name( PP_UTILS_MAP(Name, _CREATE_DATA_STRUCT_FUNC_ARGS, __VA_ARGS__) int _=0 ) { \
             Name##Data _tmp;                        \
             PP_UTILS_MAP(Name, _CREATE_DATA_STRUCT_ASSIGN, __VA_ARGS__) \
             return _tmp;                            \
