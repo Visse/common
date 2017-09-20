@@ -61,6 +61,7 @@ namespace Common
         if (StringUtils::equal(str, len, "true", StringUtils::EqualFlags::IgnoreCase) ||
             StringUtils::equal(str, len, "1", StringUtils::EqualFlags::IgnoreCase)) 
         {
+            value = true;
             return true;
         }
         if (StringUtils::equal(str, len, "false", StringUtils::EqualFlags::IgnoreCase) ||
