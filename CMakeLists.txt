@@ -48,6 +48,7 @@ add_library( Common SHARED
 
     BuiltinFromString.h
     src/BuiltinFromString.cpp
+    FromString.h
 
     GeneratorN.h
     BinaryFind.h
