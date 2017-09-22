@@ -68,12 +68,16 @@ add_library( Common SHARED
     src/HashTable.cpp
 
     IntrusiveList.h
+
+    Yaml.h
+    src/Yaml.cpp
 )
 target_link_libraries(Common
     PRIVATE stb
     PRIVATE tinydir
     PRIVATE lz4
     PRIVATE mgn
+    PRIVATE libyaml
 )
 
 target_compile_definitions(Common
