@@ -71,9 +71,6 @@ namespace Common
 
     private:
         template< typename Type >
-        friend Archive CreateArchive( Type &&impl );
-
-        template< typename Type >
         Archive( Type &&impl );
 
     public:

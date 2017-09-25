@@ -52,13 +52,13 @@ namespace Common
         {
             return "";
         }
+
+        template< typename Type >
+        static Archive CreateArchive( Type &&impl )
+        {
+            return Archive(std::move(impl));
+        }
     };
-    
-    template< typename Impl >
-    Archive CreateArchive( Impl &&impl )
-    {
-        return Archive(std::move(impl));
-    }
 
     template< typename Type >
     Archive::Archive( Type &&impl ) :
@@ -116,15 +116,15 @@ namespace Common
             {
                 return path.c_str();
             }
-
+            
+            static Archive OpenArchive( const std::string &path )
+            {
+                Impl impl;
+                impl.path = path + '/';
+                return CreateArchive(std::move(impl));
+            }
         };
 
-        Archive OpenArchive( const std::string &path )
-        {
-            Impl impl;
-            impl.path = path + '/';
-            return CreateArchive(std::move(impl));
-        }
     }
 
 
@@ -209,117 +209,117 @@ namespace Common
             {
                 return path.c_str();
             }
-        };
-        
-        Archive OpenArchive( const std::string &path, std::ifstream &file, ArchiveHeader header )
-        {
-            if (header.fileCount > MAX_FILE_COUNT) {
-                LOG_ERROR("Too many files(%i) in archive \"%s\", limit is %i", (int)header.fileCount, path.c_str(), (int)MAX_FILE_COUNT);   
-                return Archive {};
-            }
 
-            std::vector<ArchiveFileTableEntry> fileTable(MAX_FILE_COUNT);
-
-            if (!file.read((char*)fileTable.data(), header.fileCount * sizeof(ArchiveFileTableEntry))) {
-                LOG_ERROR("Failed to read file table from archive \"%s\"", path.c_str());
-                return Archive {};
-            }
-
-            uint64_t fileSize = 0;
+            static Archive OpenArchive( const std::string &path, std::ifstream &file, ArchiveHeader header )
             {
-                auto pos = file.tellg();
-                file.seekg(std::ios::end);
-                auto end = file.tellg();
-                file.seekg(pos);
-
-                fileSize = end - pos;
-
-                if (!file) {
-                    LOG_ERROR("Failed to retrive file size of archive \"%s\"", path.c_str());
+                if (header.fileCount > MAX_FILE_COUNT) {
+                    LOG_ERROR("Too many files(%i) in archive \"%s\", limit is %i", (int)header.fileCount, path.c_str(), (int)MAX_FILE_COUNT);   
                     return Archive {};
                 }
+
+                std::vector<ArchiveFileTableEntry> fileTable(MAX_FILE_COUNT);
+
+                if (!file.read((char*)fileTable.data(), header.fileCount * sizeof(ArchiveFileTableEntry))) {
+                    LOG_ERROR("Failed to read file table from archive \"%s\"", path.c_str());
+                    return Archive {};
+                }
+
+                uint64_t fileSize = 0;
+                {
+                    auto pos = file.tellg();
+                    file.seekg(std::ios::end);
+                    auto end = file.tellg();
+                    file.seekg(pos);
+
+                    fileSize = end - pos;
+
+                    if (!file) {
+                        LOG_ERROR("Failed to retrive file size of archive \"%s\"", path.c_str());
+                        return Archive {};
+                    }
+                }
+
+                uint64_t totalSize = 0, largestCompressedSize = 0;
+
+                // Verify file table
+                for (auto &entry : fileTable) {
+                    if (std::count(std::begin(entry.name), std::end(entry.name), '\0') == 0) {
+                        LOG_ERROR("Invalid filetable in archive \"%s\" - entry has invalid name (misssing terminating '\\0'", path.c_str());
+                        return Archive {};
+                    }
+
+                    if (entry.offset > fileSize || (entry.offset+entry.compressedSize) > fileSize) {
+                        LOG_ERROR("Invalid filetable in archive \"%s\" - entry has invalid offset (%llu) and/or size (%llu)", path.c_str(), entry.offset, entry.compressedSize);
+                        return Archive {};
+                    }
+
+                    if (entry.filesize > MAX_FILE_SIZE) {
+                        LOG_ERROR("Invalid filetable in archive \"%s\" - entry has to big size (%llu) max is %zu", path.c_str(), entry.filesize);
+                        return Archive {};
+                    }
+
+                    totalSize += entry.filesize;
+                    largestCompressedSize = std::max(largestCompressedSize, entry.compressedSize);
+                }
+
+                if (totalSize > MAX_TOTAL_FILE_SIZE) {
+                    LOG_ERROR("Invalid archive \"%s\" to big size %llu, max is %llu", path.c_str(), totalSize, MAX_TOTAL_FILE_SIZE);
+                    return Archive {};
+                }
+                std::vector<uint8_t> data(totalSize);
+                uint64_t decompressedSize = 0;
+
+
+                std::vector<FileInfo> files(fileTable.size());
+
+                // Decompress the files
+                auto tableEnd = file.tellg();
+                std::vector<uint8_t> buffer(largestCompressedSize);
+
+                for (size_t i=0, s=fileTable.size(); i < s; ++i) {
+                    const auto &entry = fileTable[i];
+                    auto &info = files[i];
+
+                    // entry.name has been validated to be nulled terminated 
+                    strncpy(info.name, entry.name, MAX_FILE_NAME_LENGHT);
+
+                    file.seekg(tableEnd + std::streamoff(entry.offset));
+                    if (!file.read((char*)buffer.data(), entry.compressedSize)) {
+                        LOG_ERROR("Failed to read file (\"%s\") in archive \"%s\"", info.name, path.c_str());
+                        return Archive {};
+                    }
+
+                    int ret = LZ4_decompress_safe((const char*)buffer.data(), (char*)(data.data()+decompressedSize), entry.compressedSize, entry.filesize);
+                    if (ret < 0) {
+                        LOG_ERROR("Failed to decompress file (\"%s\") in archive \"%s\"", info.name, path.c_str());
+                        return Archive {};
+                    }
+
+                    if (ret != entry.filesize) {
+                        LOG_ERROR("Failed to decompress file (\"%s\") in archive \"%s\" - missmatch for expecet (%llu) and gotten size (%llu)", info.name, path.c_str(), entry.filesize, (uint64_t)ret);
+                        return Archive {};
+                    }
+
+                    info.offset = decompressedSize;
+                    info.size = entry.filesize;
+                    decompressedSize += entry.filesize;
+                }
+
+                Impl impl;
+                impl.path = path;
+                impl.header = header;
+                impl.fileTable = std::move(files);
+                impl.fileData = std::move(data);
+
+                return CreateArchive(std::move(impl));
             }
-
-            uint64_t totalSize = 0, largestCompressedSize = 0;
-
-            // Verify file table
-            for (auto &entry : fileTable) {
-                if (std::count(std::begin(entry.name), std::end(entry.name), '\0') == 0) {
-                    LOG_ERROR("Invalid filetable in archive \"%s\" - entry has invalid name (misssing terminating '\\0'", path.c_str());
-                    return Archive {};
-                }
-
-                if (entry.offset > fileSize || (entry.offset+entry.compressedSize) > fileSize) {
-                    LOG_ERROR("Invalid filetable in archive \"%s\" - entry has invalid offset (%llu) and/or size (%llu)", path.c_str(), entry.offset, entry.compressedSize);
-                    return Archive {};
-                }
-
-                if (entry.filesize > MAX_FILE_SIZE) {
-                    LOG_ERROR("Invalid filetable in archive \"%s\" - entry has to big size (%llu) max is %zu", path.c_str(), entry.filesize);
-                    return Archive {};
-                }
-
-                totalSize += entry.filesize;
-                largestCompressedSize = std::max(largestCompressedSize, entry.compressedSize);
-            }
-
-            if (totalSize > MAX_TOTAL_FILE_SIZE) {
-                LOG_ERROR("Invalid archive \"%s\" to big size %llu, max is %llu", path.c_str(), totalSize, MAX_TOTAL_FILE_SIZE);
-                return Archive {};
-            }
-            std::vector<uint8_t> data(totalSize);
-            uint64_t decompressedSize = 0;
-
-
-            std::vector<FileInfo> files(fileTable.size());
-
-            // Decompress the files
-            auto tableEnd = file.tellg();
-            std::vector<uint8_t> buffer(largestCompressedSize);
-
-            for (size_t i=0, s=fileTable.size(); i < s; ++i) {
-                const auto &entry = fileTable[i];
-                auto &info = files[i];
-
-                // entry.name has been validated to be nulled terminated 
-                strncpy(info.name, entry.name, MAX_FILE_NAME_LENGHT);
-
-                file.seekg(tableEnd + std::streamoff(entry.offset));
-                if (!file.read((char*)buffer.data(), entry.compressedSize)) {
-                    LOG_ERROR("Failed to read file (\"%s\") in archive \"%s\"", info.name, path.c_str());
-                    return Archive {};
-                }
-
-                int ret = LZ4_decompress_safe((const char*)buffer.data(), (char*)(data.data()+decompressedSize), entry.compressedSize, entry.filesize);
-                if (ret < 0) {
-                    LOG_ERROR("Failed to decompress file (\"%s\") in archive \"%s\"", info.name, path.c_str());
-                    return Archive {};
-                }
-
-                if (ret != entry.filesize) {
-                    LOG_ERROR("Failed to decompress file (\"%s\") in archive \"%s\" - missmatch for expecet (%llu) and gotten size (%llu)", info.name, path.c_str(), entry.filesize, (uint64_t)ret);
-                    return Archive {};
-                }
-
-                info.offset = decompressedSize;
-                info.size = entry.filesize;
-                decompressedSize += entry.filesize;
-            }
-
-            Impl impl;
-            impl.path = path;
-            impl.header = header;
-            impl.fileTable = std::move(files);
-            impl.fileData = std::move(data);
-
-            return CreateArchive(std::move(impl));
-        }
+        };
     }
     
     COMMON_API Archive Archive::OpenArchive( const std::string &path )
     {
         if (FileUtils::isDirectory(path)) {
-            return Directory::OpenArchive(path);
+            return Directory::Impl::OpenArchive(path);
         }
 
         std::ifstream file(path);
@@ -340,7 +340,7 @@ namespace Common
 
         switch (header.version) {
         case 1:
-            return Ver1::OpenArchive(path, file, header);
+            return Ver1::Impl::OpenArchive(path, file, header);
         }
 
         LOG_ERROR("Unkown archive version %i for file \"%s\"", header.version, path.c_str());
