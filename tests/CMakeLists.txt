@@ -8,16 +8,12 @@ if (${BUILD_TESTS})
 function( create_test name )
     add_executable( ${name} ${ARGN} )
     add_test( NAME ${name} COMMAND ${name} )
-    target_link_libraries( ${name} catch )
- 
-    add_custom_command( TARGET ${name} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Common> $<TARGET_FILE_DIR:${name}>/$<TARGET_FILE_NAME:Common>
-        COMMENT "Copying $<TARGET_FILE_NAME:Common>"
-    )
+    target_link_libraries( ${name} catch Common )
     
     set_target_properties( ${name} PROPERTIES
        FOLDER "Tests"
        EXCLUDE_FROM_ALL TRUE
+       RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:Common>
     )
     if (TARGET BUILD_TESTS)
         add_dependencies(BUILD_TESTS ${name})
@@ -47,28 +43,14 @@ set_tests_properties( ArchiveTest PROPERTIES
 )
 
 create_test( GeneratorN GeneratorN.cpp )
-target_link_libraries( GeneratorN Common )
-
 create_test( HandleVector HandleVector.cpp )
-target_link_libraries( HandleVector Common )
-
 create_test( Variant Variant.cpp )
-target_link_libraries( Variant Common )
-
 create_test(EnumString EnumString.cpp)
-target_link_libraries(EnumString Common)
-
 create_test(PImplHelper PImplHelper.cpp)
-target_link_libraries(PImplHelper Common)
-
 create_test(FlatMap FlatMap.cpp)
-target_link_libraries(FlatMap Common)
-
 create_test(HashTable HashTable.cpp)
-target_link_libraries(HashTable Common)
-
 create_test(IntrusiveList IntrusiveList.cpp)
-target_link_libraries(IntrusiveList Common)
+create_test(BuddyAllocator BuddyAllocator.cpp)
 
 
 add_custom_command(TARGET BUILD_TESTS POST_BUILD

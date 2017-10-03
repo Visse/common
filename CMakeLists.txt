@@ -68,6 +68,9 @@ add_library( Common SHARED
     src/HashTable.cpp
 
     IntrusiveList.h
+
+    BuddyAllocator.h
+    src/BuddyAllocator.cpp
 )
 target_link_libraries(Common
     PRIVATE stb
