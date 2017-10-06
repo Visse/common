@@ -34,7 +34,9 @@
 
 #define DECL_ENUM_FROM_STRING(Enum, API, ...)                               \
     API bool Enum##FromString(const char *str, size_t len, Enum &value);    \
-    API bool Enum##FromString(const char *str, Enum &value);
+    API bool Enum##FromString(const char *str, Enum &value);                \
+    API bool FromString(const char *str, size_t len, Enum &value);          \
+    API bool FromString(const char *str, Enum &value);
 
 #define DECL_ENUM_TO_STRING(Enum, API, ...) \
     API const char *Enum##ToString(Enum value);
@@ -81,7 +83,13 @@ namespace internal
     }                                                                           \
     API bool Enum##FromString(const char *str, Enum &value) {                   \
         return Enum##FromString(str, strlen(str), value);                       \
-    }
+    }                                                                           \
+    API bool FromString(const char *str, size_t len, Enum &value) {             \
+        return Enum##FromString(str, len, value);                               \
+    }                                                                           \
+    API bool FromString(const char *str, Enum &value) {                         \
+        return Enum##FromString(str, strlen(str), value);                       \
+    }                                                                           \
 
 
 #define DECL_ENUM_TO_STRING_CASE(Name, ...)   \
