@@ -340,13 +340,24 @@ namespace Common
         return BuddyAllocatorImpl::SizeOfMetaDataForMemory(memorySize, leafSize);
     }
      
+    COMMON_API BuddyAllocator::BuddyAllocator()
+    {
+    }
+
     COMMON_API BuddyAllocator::BuddyAllocator( void *metaData, size_t metaDataSize, void *memory, size_t memorySize, size_t leafSize )
     {
-        BuddyAllocatorImpl::init(mImpl, metaData, metaDataSize, memory, memorySize, leafSize);   
+        BuddyAllocatorImpl::init(mImpl, metaData, metaDataSize, memory, memorySize, leafSize);
     }
 
     COMMON_API BuddyAllocator::~BuddyAllocator()
     {
+    }
+
+    COMMON_API void BuddyAllocator::swap( BuddyAllocator &other )
+    {
+        Impl tmp = *mImpl;
+        *mImpl = *other.mImpl;
+        other.mImpl = tmp;
     }
 
     COMMON_API void* BuddyAllocator::allocate( size_t size )
