@@ -34,7 +34,7 @@ namespace Common
                 idx(i)
             {}
 
-            Type operator *() {
+            Type operator *() const {
                 return generator->func(idx);
             }
 
