@@ -2,6 +2,8 @@
 
 #include "mgn/hashtable.h"
 
+#include <cstring>
+
 namespace Common
 {
     namespace internal
@@ -22,7 +24,10 @@ namespace Common
 
         COMMON_API bool HashTableBase::insert(uint64_t hash, const void * item)
         {
-            if (find(hash)) return false;
+            if (void *tmp = find(hash)) {
+                std::memcpy(tmp, item, mImpl->hashtable.item_size);
+                return false;
+            }
             hashtable_insert(&mImpl->hashtable, hash, item);
             return true;
         }
