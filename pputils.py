@@ -25,10 +25,14 @@ print('''#pragma once
 print('#define _PP_UTILS_NARGS_HELPER( %s, N, ... ) N'%', '.join([ '_'+str(i) for i in range(1,count+1)]), file=file)
 print('#define PP_UTILS_NARGS( ... ) PP_UTILS_EXPAND_VARGS(_PP_UTILS_NARGS_HELPER,(,##__VA_ARGS__, %s)) '%', '.join([str(i) for i in reversed(range(0,count))]), file=file)
 
+print('', file=file)
+
 print('''
-
-
+#define _PP_UTILS_UNWRAP_HELPER(...) __VA_ARGS__
+#define PP_UTILS_UNWRAP( ARGS ) PP_UTILS_EXPAND_VARGS(_PP_UTILS_UNWRAP_HELPER, ARGS)
 ''', file=file)
+
+print('', file=file)
 
 print('#define _PP_UTILS_MAP_HELPER_0(NAME, FUNC)', file=file)
 for i in range(1,count+1):
