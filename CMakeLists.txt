@@ -71,6 +71,8 @@ add_library( Common SHARED
 
     BuddyAllocator.h
     src/BuddyAllocator.cpp
+
+    CreateDefaultOperators.h
 )
 target_link_libraries(Common
     PRIVATE stb
