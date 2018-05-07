@@ -43,3 +43,4 @@
     }                                                               \
     
 
+#define ENUM_FLAG_VALUE(x) (1 << (x))
