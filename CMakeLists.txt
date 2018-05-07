@@ -75,6 +75,8 @@ add_library( Common SHARED
     CreateDefaultOperators.h
 
     Trace.h
+
+    uint32_log2.h
 )
 target_link_libraries(Common
     PRIVATE stb
