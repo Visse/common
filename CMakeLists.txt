@@ -78,6 +78,8 @@ add_library( Common SHARED
 
     uint32_log2.h
 
+    BlockAllocator.h
+    src/BlockAllocator.cpp
 
     IAllocator.h
 
