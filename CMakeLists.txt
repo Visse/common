@@ -78,6 +78,9 @@ add_library( Common SHARED
 
     uint32_log2.h
 
+
+    IAllocator.h
+
     DynamicBitUtilty.h
 )
 target_link_libraries(Common
