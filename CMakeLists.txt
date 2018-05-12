@@ -77,6 +77,8 @@ add_library( Common SHARED
     Trace.h
 
     uint32_log2.h
+
+    DynamicBitUtilty.h
 )
 target_link_libraries(Common
     PRIVATE stb

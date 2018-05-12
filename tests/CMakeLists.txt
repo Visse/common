@@ -51,6 +51,7 @@ create_test(FlatMap FlatMap.cpp)
 create_test(HashTable HashTable.cpp)
 create_test(IntrusiveList IntrusiveList.cpp)
 create_test(BuddyAllocator BuddyAllocator.cpp)
+create_test(DynamicBitUtility DynamicBitUtility.cpp)
 
 
 add_custom_command(TARGET BUILD_TESTS POST_BUILD
