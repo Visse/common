@@ -17,9 +17,9 @@ namespace Common
         DECLARE_ENUM_FLAG(Flags);
 
         struct Impl {
-            size_t blockSize, blockCount;
+            size_t blockSize = 1, blockCount = 0;
 
-            uint32_t *blockInfo;
+            uint32_t *blockInfo = nullptr;
             Flags flags = Flags::None;
         };
 
@@ -38,7 +38,6 @@ namespace Common
         void init( Impl *impl, size_t blockSize, size_t blockCount, void *metadata, size_t metadataSize )
         {
             assert (blockSize > 0);
-            assert (blockCount > 0);
 
             impl->blockSize = blockSize;
             impl->blockCount = blockCount;
@@ -79,7 +78,7 @@ namespace Common
 
         uintptr_t allocateBlocks( Impl *impl, size_t count )
         {
-            assert (count >= 1);
+            if (count == 0) return BlockAllocator::NULL_PTR;
 
             if (count > impl->blockCount) return BlockAllocator::NULL_PTR;
             size_t lastBlock = impl->blockCount - count;
@@ -114,7 +113,7 @@ namespace Common
             uint32_t wasFree = DynamicBitUtility::swapBit(impl->blockInfo, block*2 + 0, 0);
             uint32_t cont = DynamicBitUtility::swapBit(impl->blockInfo, block*2 + 1, 0);
 
-            assert (wasFree == true);
+            assert (wasFree == 1);
             (void)wasFree;
 
             return cont;
@@ -144,6 +143,22 @@ namespace Common
 
             freeBlocks(impl, block);
         }
+
+        void cloneAllocationsFrom( Impl *impl, const Impl *other )
+        {
+            assert (impl->blockCount >= other->blockCount);
+            assert (impl->blockSize == other->blockSize);
+
+            // Clear all old allocations
+            size_t metadataSize = requiredMetadataSize(impl->blockCount);
+            std::memset(impl->blockInfo, 0, metadataSize);
+
+            // Clone allocations
+            size_t copySize = requiredMetadataSize(other->blockCount);
+
+            assert (copySize <= metadataSize);
+            std::memcpy(impl->blockInfo, other->blockInfo, copySize);
+        }
     }
 
     namespace impl = BlockAllocatorImpl;
@@ -155,6 +170,11 @@ namespace Common
         return impl::requiredMetadataSize(blockCount);
     }
 
+    COMMON_API BlockAllocator::BlockAllocator()
+    {
+        impl::init(mImpl, 1, 0, nullptr, 0);
+    }
+
     COMMON_API BlockAllocator::BlockAllocator( size_t blockSize, size_t blockCount )
     {
         impl::init(mImpl, blockSize, blockCount, nullptr, 0);
@@ -164,6 +184,19 @@ namespace Common
                                                size_t blockSize, size_t blockCount )
     {
         impl::init(mImpl, blockSize, blockCount, metadata, metadataSize);
+    }
+
+    COMMON_API BlockAllocator::BlockAllocator( BlockAllocator &&move )
+    {
+        mImpl = std::move(move.mImpl);
+        *move.mImpl = Impl();
+    }
+
+    COMMON_API BlockAllocator& BlockAllocator::operator = ( BlockAllocator &&move )
+    {
+        mImpl = std::move(move.mImpl);
+        *move.mImpl = Impl();
+        return *this;
     }
 
     COMMON_API BlockAllocator::~BlockAllocator()
@@ -179,5 +212,9 @@ namespace Common
     COMMON_API void BlockAllocator::free( uintptr_t ptr )
     {
         return impl::free(mImpl, ptr);
+    }
+    COMMON_API void BlockAllocator::cloneAllocationsFrom( const BlockAllocator &other )
+    {
+        impl::cloneAllocationsFrom(mImpl, other.mImpl);
     }
 }
