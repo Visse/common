@@ -2,6 +2,7 @@
 
 
 #include "HandleType.h"
+#include "IteratorAdopter.h"
 
 #include <vector>
 #include <type_traits>
@@ -40,6 +41,14 @@ public:
     static constexpr bool IsHandleFromThis(Handle handle) {
         return GetData(handle) == DataValue;
     }
+    
+
+    template< typename Type >
+    class IteratorBase;
+
+    typedef IteratorBase<Value> iterator;
+    typedef IteratorBase<const Value> const_iterator;
+
 
 private:
     static constexpr underlaying_type MaskAndOffset( underlaying_type value, underlaying_type mask, underlaying_type offset ) {
@@ -204,6 +213,14 @@ public:
         }
     }
     
+    template< typename Func >
+    void forEachHandle( Func &&func ) const {
+        for (const auto &entry : mValues) {
+            if (IsHandleFree(entry.handle)) continue;
+            func(entry.handle);
+        }
+    }
+    
     Handle create( const Value &value ) {
         return emplace(value);
     }
@@ -294,6 +311,74 @@ public:
     size_t underlying_size() {
         return mValues.size();
     }
+
+    iterator begin() {
+        return iterator(mValues.begin(), mValues.begin(), mValues.end());
+    }
+    iterator end() {
+        return iterator(mValues.end(), mValues.begin(), mValues.end());
+    }
+    const_iterator begin() const {
+        return const_iterator(mValues.begin(), mValues.begin(), mValues.end());
+    }
+    const_iterator end() const {
+        return const_iterator(mValues.end(), mValues.begin(), mValues.end());
+    }
+
+
+public:    
+    template< typename Type >
+    class IteratorBase :
+        public Common::IteratorAdopter<IteratorBase<Type>, Type, std::bidirectional_iterator_tag>
+    {
+        using base_iterator = typename std::conditional<
+                                  std::is_const<Type>::value, 
+                                  typename value_vector::const_iterator,
+                                  typename value_vector::iterator
+                              >::type;
+
+        base_iterator mIter, mBeg, mEnd;
+
+    public:
+        IteratorBase() = default;
+        IteratorBase( const IteratorBase& ) = default;
+        IteratorBase& operator = ( const IteratorBase& ) = default;
+
+        IteratorBase( base_iterator iter, base_iterator beg, base_iterator end ) :
+            mIter(iter),
+            mBeg(beg),
+            mEnd(end)
+        {}
+
+        const Handle& handle() const {
+            return mIter->handle;
+        }
+
+        bool equal( const IteratorBase &other ) const
+        {
+            return mIter == other.mIter;
+        }
+
+        void increment()
+        {
+            if (mIter == mEnd) return;
+
+            do {
+                ++mIter;
+            } while (mIter != mEnd && IsHandleFree(mIter->handle));
+        }
+
+        void decrement()
+        {
+            if (mIter == mBeg) return;
+
+            do {
+                --mIter;
+            } while (mIter != mBeg && IsHandleFree(mIter->handle));
+        }
+    };
+
+
 
 private:
     bool validate( Handle handle, const ValuePair* &data ) const {

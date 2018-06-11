@@ -255,7 +255,48 @@ TEST_CASE( "HandleVector", "[Common][HandleVector]" )
         }
     }
 
+    SECTION("Iterators")
+    {
+        HandleVector<TestHandle, Value> vector;
+        using iterator = HandleVector<TestHandle, Value>::iterator;
 
+        std::vector<TestHandle> handles;
+
+        REQUIRE(vector.begin() == vector.end());
+
+        for (int i=0; i < 1000; ++i) {
+            auto handle = vector.emplace(i);
+            handles.push_back(handle);
+        }
+
+        auto testIter = [&]() {
+            std::set<TestHandle> visited;
+            for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
+                TestHandle handle = iter.handle();
+                REQUIRE(handle);
+                REQUIRE(visited.count(handle) == 0);
+                visited.insert(handle);
+            }
+            REQUIRE(visited.size() == handles.size());
+
+            for (auto handle : handles) {
+                REQUIRE(visited.count(handle) == 1);
+            }
+        };
+        testIter();
+
+        // remove some handles
+        srand(0);
+        for (int i=0; i < 500; ++i) {
+            int idx = rand() % handles.size();
+
+            auto handle = handles[idx];
+            vector.free(handle);
+            handles.erase(handles.begin() + idx);
+        }
+
+        testIter();
+    }
 
     REQUIRE(ValueInstances == 0);
 }
