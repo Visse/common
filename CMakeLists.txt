@@ -85,6 +85,13 @@ add_library( Common SHARED
 
     DynamicBitUtilty.h
 
+    HalfEdgeMesh.h
+    src/HalfEdgeMesh.impl.h
+    src/HalfEdgeMesh.cpp
+
+    HalfEdgeMeshIterator.h
+    src/HalfEdgeMeshIterator.cpp
+
     IteratorAdopter.h
 )
 target_link_libraries(Common

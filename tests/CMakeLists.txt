@@ -11,7 +11,7 @@ function( create_test name )
     target_link_libraries( ${name} catch Common )
     
     set_target_properties( ${name} PROPERTIES
-       FOLDER "Tests"
+       FOLDER "Tests//Common"
        EXCLUDE_FROM_ALL TRUE
        RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:Common>
     )
@@ -53,6 +53,7 @@ create_test(IntrusiveList IntrusiveList.cpp)
 create_test(BuddyAllocator BuddyAllocator.cpp)
 create_test(BlockAllocator BlockAllocator.cpp IAllocator.h)
 create_test(DynamicBitUtility DynamicBitUtility.cpp)
+create_test(HalfEdgeMesh HalfEdgeMesh.cpp)
 create_test(IteratorAdopter IteratorAdopter.cpp)
 
 
