@@ -18,137 +18,96 @@
 
 namespace internal 
 {
-    enum Color {
-        Information,
-        Warning,
-        Error,
-        Performance
-    };
+    // Helper for setting console color,
+    // its also responseble for adding a new line and flushing
     struct ColorLock {
-        ColorLock( Color color );
+        ColorLock( int level );
         ~ColorLock();
     };
 
 
-    void logva( const char *format, std::va_list args ) {
+    void outputva( const char *format, std::va_list args ) {
         char buffer[STB_SPRINTF_MIN];
 
         STBSP_SPRINTFCB *callback = []( char *buf, void *user, int len) -> char* {
             fwrite(buf, len, 1, stderr);
             return buf;
         };
-
-        stbsp_vsprintfcb( callback, nullptr, buffer, format, args );
+        stbsp_vsprintfcb(callback, nullptr, buffer, format, args);
     }
-    void log( const char *format, ... ) {
+    void output( const char *format, ... ) PRINTF_FORMAT(1,2) {
         va_list args;
+
         va_start(args, format);
-        logva(format, args);
+        outputva(format, args);
         va_end(args);
     }
 
-    void printTimeStamp() {
+    void doLogHeaders( int level, const char *module, const char *file, int line )
+    {
+
         uint64_t time = Clock::GetMSecSinceStart();
-        
         unsigned msecs =  (unsigned)(time % 1000),
                  seconds = (unsigned)((time/1000) % 60),
                  minutes = (unsigned)(time/60000);
         
-        log("[%0u:%02u:%03u]\t", minutes, seconds, msecs);
+       // output("[%u:%u:%u][%i][%s][%s:%i]: ", minutes, seconds, msecs, level, module, file, line);
+        // for now don't print filename+line to console, it takes up too much space
+        output("[%u:%u:%u][%i][%s]: ", minutes, seconds, msecs, level, module);
     }
 
-    void COMMON_API NO_RETURN fatal_error( const char* format, ... )
+    void doLog( int level, const char *module, const char *file, int line, const char *format, std::va_list args )
     {
-        {
-            ColorLock lock( Error );
-            printTimeStamp();
-        
+        ColorLock lock(level);
 
-            va_list args;
-            va_start( args, format );
-            logva(format, args);
-            std::fputc( '\n', stderr );
-            va_end( args );
-        }
-        std::fflush( stderr );
+        doLogHeaders(level, module, file, line);
+        outputva(format, args);
+    }
+    
+    COMMON_API void NO_RETURN fatal_error( const char *module, const char *file, int line, const char *format, ... )
+    {
+        va_list args;
+        va_start( args, format );
+        doLog(fatal, module, file, line, format, args);
+        va_end( args );
 
         debugbreak;
         raise( SIGINT );
         std::exit( 1 );
     }
     
-    void COMMON_API  error(const char* format, ...)
+    COMMON_API void log( int level, const char *module, const char *file, int line, const char *format, ... )
     {
-        ColorLock lock( Error );
-        printTimeStamp();
-        
         va_list args;
         va_start( args, format );
-        logva(format, args);
-        std::fputc( '\n', stderr );
+        doLog(level, module, file, line, format, args);
         va_end( args );
-        std::fflush( stderr );
-        
-//         raise( SIGTRAP );
-    }
-
-    void COMMON_API warning(const char* format, ...)
-    {
-        ColorLock lock( Warning );
-        printTimeStamp();
-        
-        va_list args;
-        va_start( args, format );
-        logva(format, args);
-        std::fputc( '\n', stderr );
-        va_end( args );
-        std::fflush( stderr );
-        
-//         raise( SIGTRAP );
     }
     
-    void COMMON_API information(const char* format, ...)
+    COMMON_API void NO_RETURN assert_failed( const char *module, const char *file, int line, const char *condition, const char *format, ... )
     {
-        ColorLock lock( Information );
-        printTimeStamp();
-        
+        ColorLock lock(fatal);
+        doLogHeaders(fatal, module, file, line);
+
+        output("Assertion \"%s\" failed: ", condition);
+
         va_list args;
-        va_start( args, format );
-        logva(format, args);
-        std::fputc( '\n', stderr );
-        va_end( args );
-        std::fflush( stderr );
-    }
-    
-    void COMMON_API performance(const char* format, ...)
-    {
-        ColorLock lock( Performance );
-        printTimeStamp();
-        
-        va_list args;
-        va_start( args, format );
-        logva(format, args);
-        std::fputc( '\n', stderr );
-        va_end( args );
-        std::fflush( stderr );
+        va_start(args, format);
+        outputva(format, args);
+        va_end(args);
+
+        debugbreak;
+        raise( SIGINT );
+        std::exit( 1 );
     }
 
-    void COMMON_API NO_RETURN assert_failed( const char *condition, const char *format, ... )
+    COMMON_API void NO_RETURN assert_failed( const char *module, const char *file, int line, const char *condition )
     {
-        {
-            ColorLock lock( Error );
-            printTimeStamp();
+        ColorLock lock(fatal);
+        doLogHeaders(fatal, module, file, line);
 
-            log("Assertion \"%s\" Failed: ", condition);
-            
-            va_list args;
-            va_start(args, format);
-            logva(format, args);
-            std::fputc('\n', stderr);
-            va_end(args);
-        }
-        std::fflush(stderr);
-        
+        output("Assertion \"%s\" failed: ", condition);
+
         debugbreak;
         raise( SIGINT );
         std::exit( 1 );
@@ -168,7 +127,7 @@ bool SUPPORTS_COLOR = false;
 
 #include <unistd.h>
 
-internal::ColorLock::ColorLock(internal::Color color)
+internal::ColorLock::ColorLock( int color)
 {
     if( !COLOR_INIT ) {
         SUPPORTS_COLOR = isatty(fileno(stderr));
@@ -177,16 +136,18 @@ internal::ColorLock::ColorLock(internal::Color color)
     if( !SUPPORTS_COLOR ) return;
 
     switch( color ) {
-    case( Information ):
+    case( debug ):
+    case( information ):
         break;
-    case( Warning ):
+    case( performance ):
+        std::fputs( COLOR_BLUE, stderr );
+        break;
+    case( warning ):
         std::fputs( COLOR_YELLOW, stderr );
         break;
-    case( Error ):
+    case( error ):
+    case( fatal ):
         std::fputs( COLOR_RED, stderr );
-        break;
-    case( Performance ):
-        std::fputs( COLOR_BLUE, stderr );
         break;
     }
 }
@@ -196,6 +157,8 @@ internal::ColorLock::~ColorLock()
     if( !SUPPORTS_COLOR ) return;
 
     std::fputs( COLOR_NORMAL, stderr );
+    std::fputc('\n', stderr);
+    std::fflush(stderr);
 }
 
 #elif WIN32
@@ -213,7 +176,7 @@ bool SUPPORTS_COLOR = false;
 
 HANDLE hConsole;
 
-internal::ColorLock::ColorLock(internal::Color color)
+internal::ColorLock::ColorLock( int color)
 {
     if( !COLOR_INIT ) {
         hConsole = GetStdHandle( STD_ERROR_HANDLE );
@@ -222,18 +185,20 @@ internal::ColorLock::ColorLock(internal::Color color)
         SUPPORTS_COLOR = (hConsole != INVALID_HANDLE_VALUE);
     }
     if( !SUPPORTS_COLOR ) return;
-
+    
     switch( color ) {
-    case( Information ):
+    case( debug ):
+    case( information ):
         break;
-    case( Warning ):
+    case( performance ):
+        SetConsoleTextAttribute( hConsole, COLOR_BLUE );
+        break;
+    case( warning ):
         SetConsoleTextAttribute( hConsole, COLOR_YELLOW );
         break;
-    case( Error ):
+    case( error ):
+    case( fatal ):
         SetConsoleTextAttribute( hConsole, COLOR_RED );
-        break;
-    case( Performance ):
-        SetConsoleTextAttribute( hConsole, COLOR_BLUE );
         break;
     }
 }
@@ -242,7 +207,9 @@ internal::ColorLock::~ColorLock()
 {
     if( !SUPPORTS_COLOR ) return;
     
-        SetConsoleTextAttribute( hConsole, COLOR_NORMAL );
+    SetConsoleTextAttribute( hConsole, COLOR_NORMAL );
+    std::fputc('\n', stderr);
+    std::fflush(stderr);
 }
 
 #endif
