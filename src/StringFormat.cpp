@@ -22,4 +22,19 @@ namespace StringUtils
 
         return std::move(data.result);
     }
+
+    
+    COMMON_API bool vsnprintf( char *buffer, size_t bufSize, const char *format, std::va_list args )
+    {
+        int ret = stbsp_vsnprintf(buffer, bufSize, format, args);
+
+        // has an error occurd?
+        if (ret < 0) return false;
+
+        // did we have big enought buffer?
+        if (ret < bufSize) return true;
+
+        // buffer was not big enought
+        return false;
+    }
 }
