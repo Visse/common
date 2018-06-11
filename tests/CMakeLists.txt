@@ -53,6 +53,7 @@ create_test(IntrusiveList IntrusiveList.cpp)
 create_test(BuddyAllocator BuddyAllocator.cpp)
 create_test(BlockAllocator BlockAllocator.cpp IAllocator.h)
 create_test(DynamicBitUtility DynamicBitUtility.cpp)
+create_test(IteratorAdopter IteratorAdopter.cpp)
 
 
 add_custom_command(TARGET BUILD_TESTS POST_BUILD

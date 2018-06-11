@@ -84,6 +84,8 @@ add_library( Common SHARED
     IAllocator.h
 
     DynamicBitUtilty.h
+
+    IteratorAdopter.h
 )
 target_link_libraries(Common
     PRIVATE stb
