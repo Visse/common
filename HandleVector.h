@@ -86,10 +86,19 @@ private:
         return GetData(handle) == FreeDataValue;
     }
 
-    struct ValuePair {
+    struct ValuePairStorage {
         Handle handle = CreateHandle(0, 0, FreeDataValue);
+        std::aligned_union_t<0, Value> storage;
+        
+        ~ValuePairStorage() noexcept(std::is_nothrow_destructible_v<Value>) {
+            if (isValid()) {
+                destroy();
+            }
+        }
 
-        typename std::aligned_union<0,Value>::type storage;
+        bool isValid() const {
+            return IsHandleFree(handle) == false;
+        }
 
         Value* value() {
             return reinterpret_cast<Value*>(&storage);
@@ -97,52 +106,216 @@ private:
         const Value* value() const {
             return reinterpret_cast<const Value*>(&storage);
         }
-
         template< typename... Args >
-        void construct( Args&&... args ) {
+        void construct( Args&&... args ) noexcept(std::is_nothrow_constructible_v<Value, Args...>) {
             new(value()) Value(std::forward<Args>(args)...);
         }
         void destroy() {
             value()->~Value();
         }
+    };
 
-        ValuePair() = default;
-        template< typename... Args >
-        ValuePair( Handle handle, Args&&... args ) :
-            handle(handle)
+    template< typename Type, bool Enable=std::is_copy_constructible_v<Value> >
+    struct CopyConstructable {
+        CopyConstructable() = default;
+        CopyConstructable( CopyConstructable&& ) = default;
+        CopyConstructable& operator = ( const CopyConstructable& ) = default;
+        CopyConstructable& operator = ( CopyConstructable&& ) = default;
+
+        Type* base() {
+            return static_cast<Type*>(this);
+        }
+        const Type* base() const {
+            return static_cast<const Type*>(this);
+        }
+        
+        CopyConstructable( const CopyConstructable &copy ) noexcept(std::is_nothrow_copy_constructible_v<Value>)
         {
+            auto base = this->base();
+            auto other = copy.base();
+            base->handle = other->handle;
+            if (other->isValid()) {
+                base->construct(*other->value());
+            }
+        }
+        
+    };
+    
+    template< typename Type >
+    struct CopyConstructable<Type, false> {
+        CopyConstructable() = default;
+        CopyConstructable( const CopyConstructable& ) = delete;
+        CopyConstructable( CopyConstructable&& ) = default;
+        CopyConstructable& operator = ( const CopyConstructable& ) = default;
+        CopyConstructable& operator = ( CopyConstructable&& ) = default;
+    };
+    
+    template< typename Type, bool Enable=std::is_copy_assignable_v<Value>>
+    struct CopyAssignable {
+        CopyAssignable() = default;
+        CopyAssignable( const CopyAssignable& ) = default;
+        CopyAssignable( CopyAssignable&& ) = default;
+        CopyAssignable& operator = ( CopyAssignable&& ) = default;
+
+        Type* base() {
+            return static_cast<Type*>(this);
+        }
+        const Type* base() const {
+            return static_cast<const Type*>(this);
+        }
+
+        CopyAssignable& operator = ( const CopyAssignable &copy ) noexcept(std::is_nothrow_copy_constructible_v<Value> && std::is_nothrow_copy_assignable_v<Value>)
+        {
+            auto base = this->base();
+            auto other = copy.base();
+
+            if (base->isValid() && other->isValid()) {
+                *base->value() = *other->value();
+            }
+            else if (base->isValid()) {
+                base->destroy();
+            }
+            else {
+                base->construct(*other->value());
+            }
+            base->handle = other->handle;
+            return *this;
+        }
+    };
+    
+    template< typename Type >
+    struct CopyAssignable<Type, false> {
+        CopyAssignable() = default;
+        CopyAssignable( const CopyAssignable& ) = default;
+        CopyAssignable( CopyAssignable&& ) = default;
+        CopyAssignable& operator = ( const CopyAssignable &copy ) = delete;
+        CopyAssignable& operator = ( CopyAssignable&& ) = default;
+    };
+
+    template< typename Type, bool Enable=std::is_move_constructible_v<Value> >
+    struct MoveConstructable {
+        MoveConstructable() = default;
+        MoveConstructable( const MoveConstructable& ) = default;
+        MoveConstructable& operator = ( const MoveConstructable &copy ) = default;
+        MoveConstructable& operator = ( MoveConstructable&& ) = default;
+
+        Type* base() {
+            return static_cast<Type*>(this);
+        }
+        const Type* base() const {
+            return static_cast<const Type*>(this);
+        }
+
+        MoveConstructable( MoveConstructable &&move ) noexcept(std::is_nothrow_move_constructible_v<Value>)
+        {
+            auto base = this->base();
+            auto other = move.base();
+            base->handle = other->handle;
+            if (other->isValid()) {
+                base->construct(std::move(*other->value()));
+            }
+        }
+    };
+    
+    template< typename Type >
+    struct MoveConstructable<Type, false> {
+        MoveConstructable() = default;
+        MoveConstructable( const MoveConstructable& ) = default;
+        MoveConstructable( MoveConstructable&& ) = delete;
+        MoveConstructable& operator = ( const MoveConstructable& ) = default;
+        MoveConstructable& operator = ( MoveConstructable&& ) = default;
+    };
+    
+    template< typename Type, bool Enable=std::is_move_assignable_v<Value> >
+    struct MoveAssignable {
+        MoveAssignable() = default;
+        MoveAssignable( const MoveAssignable& ) = default;
+        MoveAssignable( MoveAssignable&& ) = default;
+        MoveAssignable& operator = ( const MoveAssignable &copy ) = default;
+
+        Type* base() {
+            return static_cast<Type*>(this);
+        }
+        const Type* base() const {
+            return static_cast<const Type*>(this);
+        }
+
+        MoveAssignable& operator = ( MoveAssignable &&move ) noexcept(std::is_nothrow_move_constructible_v<Value> && std::is_nothrow_move_assignable_v<Value>)
+        {
+            auto base = this->base();
+            auto other = move.base();
+
+            if (base->isValid() && other->isValid()) {
+                *base->value() = std::move(*other->value());
+            }
+            else if (base->isValid()) {
+                base->destroy();
+            }
+            else {
+                base->construct(std::move(*other->value()));
+            }
+            base->handle = other->handle;
+            return *this;
+        }
+    };
+
+    template< typename Type >
+    struct MoveAssignable<Type, false> {
+        MoveAssignable() = default;
+        MoveAssignable( const MoveAssignable& ) = default;
+        MoveAssignable( MoveAssignable&& ) = default;
+        MoveAssignable& operator = ( const MoveAssignable& ) = default;
+        MoveAssignable& operator = ( const MoveAssignable&& ) = delete;
+    };
+
+
+    struct ValuePairBase :
+        public ValuePairStorage,
+        public CopyConstructable<ValuePairBase>,
+        public CopyAssignable<ValuePairBase>,
+        public MoveConstructable<ValuePairBase>,
+        public MoveAssignable<ValuePairBase>
+    {
+        static_assert( std::is_copy_constructible_v<Value> || std::is_move_constructible_v<Value>, "Value must be either copyable or movable");
+        
+        ValuePairBase() = default;
+        ValuePairBase( const ValuePairBase& ) = default;
+        ValuePairBase( ValuePairBase&& ) = default;
+        ValuePairBase& operator = ( const ValuePairBase& ) = default;
+        ValuePairBase& operator = ( ValuePairBase&& ) = default;
+    };
+
+    struct ValuePair :
+        public ValuePairBase
+    {
+        using ValuePairBase::ValuePairBase;
+
+        template< typename... Args >
+        ValuePair( Handle handle, Args&&... args ) noexcept(std::is_nothrow_constructible_v<Value, Args...>)
+        {
+            this->handle = handle;
             construct(std::forward<Args>(args)...);
         }
+        
+        ValuePair() = default;
+        ValuePair( const ValuePair& ) = default;
+        ValuePair( ValuePair&& ) = default;
+        ValuePair& operator = ( const ValuePair& ) = default;
+        ValuePair& operator = ( ValuePair&& ) = default;
 
-        ValuePair( ValuePair &&move ) :
-            handle(move.handle)
-        {
-            if (IsHandleFree(handle) == false) {
-                construct(std::move(*move.value()));
-            }
-        }
-
-        ~ValuePair()
-        {
-            if (IsHandleFree(handle) == false) {
-                destroy();
-            }
-        }
-
-        ValuePair( const ValuePair &copy ) = delete;
-        ValuePair& operator = ( const ValuePair &copy ) = delete;
+        ~ValuePair() = default;
     };
     using value_vector = std::vector<ValuePair>;
-
+    
 public:
     HandleVector() = default;
     ~HandleVector() = default;
-
-    HandleVector( const HandleVector& ) = default;
-    HandleVector( HandleVector&& ) = default;
     
-    HandleVector& operator = ( const HandleVector& ) = default;
-    HandleVector& operator = ( HandleVector&& ) = default;
+    HandleVector( const HandleVector &copy ) = default;
+    HandleVector( HandleVector &&move ) = default;
+    
+    HandleVector& operator = ( const HandleVector &copy ) = default;
+    HandleVector& operator = ( HandleVector &&move ) = default;
 
 public:
     bool get( Handle handle, Value &value ) const {

@@ -5,7 +5,31 @@
 #include "Common/HandleType.h"
 
 #include <map>
+#include <set>
 
+template< typename TestHandle, typename Value >
+void testFunctionality()
+{
+    HandleVector<TestHandle, Value> vector;
+    std::set<TestHandle> handles;
+    std::vector<TestHandle> vhandles;
+
+    for (int i=0; i < 1000; ++i) {
+        auto handle = vector.emplace(i);
+        handles.insert(handle);
+        vhandles.push_back(handle);
+    }
+    REQUIRE(handles.size() == 1000);
+
+    srand(0);
+    for (int i=0; i <100; ++i) {
+        auto iter = vhandles.begin() + rand() % vhandles.size();
+
+        vector.free(*iter);
+        handles.erase(*iter);
+        vhandles.erase(iter);
+    }
+}
 
 TEST_CASE( "HandleVector", "[Common][HandleVector]" )
 {
@@ -296,6 +320,91 @@ TEST_CASE( "HandleVector", "[Common][HandleVector]" )
         }
 
         testIter();
+    }
+
+    SECTION("Copy and move")
+    {
+        HandleVector<TestHandle, Value> vector;
+        std::map<TestHandle, uint32_t> handles;
+
+        for (int i=0; i < 1000; ++i) {
+            auto handle = vector.create(i);
+            REQUIRE((bool)handle);
+            handles[handle] = i;
+        }
+
+        int instances = ValueInstances;
+        HandleVector<TestHandle, Value> copy = vector;
+        REQUIRE(ValueInstances == 2*instances);
+        
+        for (const auto &entry : handles) {
+            REQUIRE(vector.valid(entry.first));
+            REQUIRE(copy.valid(entry.first));
+
+            *vector.find(entry.first) = entry.second*2;
+            REQUIRE(copy.find(entry.first)->val == entry.second);
+        }
+        
+        instances = ValueInstances;
+        
+        // No copies are allowed when moving
+        int copiesMade = CopiesMade;
+        HandleVector<TestHandle, Value> move = std::move(vector);
+        REQUIRE(instances == ValueInstances);
+        REQUIRE(copiesMade == CopiesMade);
+        
+        for (const auto &entry : handles) {
+            REQUIRE(!vector.valid(entry.first));
+            REQUIRE(move.valid(entry.first));
+
+            REQUIRE(move.find(entry.first)->val == 2*entry.second);
+        }
+        
+        struct NonCopyConstruct :
+            public Value
+        {
+            using Value::Value;
+            NonCopyConstruct() = default;
+            NonCopyConstruct( const NonCopyConstruct& ) = delete;
+            NonCopyConstruct( NonCopyConstruct&& ) = default;
+            NonCopyConstruct& operator = ( const NonCopyConstruct& ) = default;
+            NonCopyConstruct& operator = ( NonCopyConstruct&& ) = default;
+        };
+        struct NonCopyAssingable :
+            public Value
+        {
+            using Value::Value;
+            NonCopyAssingable() = default;
+            NonCopyAssingable( const NonCopyAssingable& ) = default;
+            NonCopyAssingable( NonCopyAssingable&& ) = default;
+            NonCopyAssingable& operator = ( const NonCopyAssingable& ) = delete;
+            NonCopyAssingable& operator = ( NonCopyAssingable&& ) = default;
+        };
+        struct NonMoveConstruct :
+            public Value
+        {
+            using Value::Value;
+            NonMoveConstruct() = default;
+            NonMoveConstruct( const NonMoveConstruct& ) = default;
+            NonMoveConstruct( NonMoveConstruct&& ) = delete;
+            NonMoveConstruct& operator = ( const NonMoveConstruct& ) = default;
+            NonMoveConstruct& operator = ( NonMoveConstruct&& ) = default;
+        };
+        struct NonMoveAssingable :
+            public Value
+        {
+            using Value::Value;
+            NonMoveAssingable() = default;
+            NonMoveAssingable( const NonMoveAssingable& ) = default;
+            NonMoveAssingable( NonMoveAssingable&& ) = default;
+            NonMoveAssingable& operator = ( const NonMoveAssingable& ) = default;
+            NonMoveAssingable& operator = ( NonMoveAssingable&& ) = delete;
+        };
+
+        testFunctionality<TestHandle, NonCopyConstruct>();
+        testFunctionality<TestHandle, NonCopyAssingable>();
+        testFunctionality<TestHandle, NonMoveConstruct>();
+        testFunctionality<TestHandle, NonMoveAssingable>();
     }
 
     REQUIRE(ValueInstances == 0);
