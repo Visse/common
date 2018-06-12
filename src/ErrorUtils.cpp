@@ -53,7 +53,7 @@ namespace internal
         
        // output("[%u:%u:%u][%i][%s][%s:%i]: ", minutes, seconds, msecs, level, module, file, line);
         // for now don't print filename+line to console, it takes up too much space
-        output("[%u:%u:%u][%i][%s]: ", minutes, seconds, msecs, level, module);
+        output("[%02u:%02u:%03u][%i][%s]: ", minutes, seconds, msecs, level, module);
     }
 
     void doLog( int level, const char *module, const char *file, int line, const char *format, std::va_list args )
