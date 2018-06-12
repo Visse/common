@@ -274,6 +274,8 @@ namespace Common
             }
             face->hedge = edges[0];
 
+            impl->onFaceCreated(face);
+
             return face;
         }
 
@@ -386,6 +388,33 @@ namespace Common
         internal::destroy(mImpl);
     }
     
+    
+    COMMON_API HalfEdgeMeshBase::HalfEdgeMeshBase( const HalfEdgeMeshBase &copy )
+    {
+        *mImpl = *copy.mImpl;
+        mImpl->this_ = this;
+    }
+
+    COMMON_API HalfEdgeMeshBase::HalfEdgeMeshBase( HalfEdgeMeshBase &&move )
+    {
+        *mImpl = std::move(*move.mImpl);
+        mImpl->this_ = this;
+    }
+        
+    COMMON_API HalfEdgeMeshBase& HalfEdgeMeshBase::operator = ( const HalfEdgeMeshBase &copy )
+    {
+        *mImpl = *copy.mImpl;
+        mImpl->this_ = this;
+        return *this;
+    }
+
+    COMMON_API HalfEdgeMeshBase& HalfEdgeMeshBase::operator = ( HalfEdgeMeshBase &&move )
+    {
+        *mImpl = std::move(*move.mImpl);
+        mImpl->this_ = this;
+        return *this;
+    }
+
     COMMON_API HalfEdgeMeshBase::VertexHandle HalfEdgeMeshBase::createVertex()
     {
         return internal::createVertex(mImpl);
@@ -483,6 +512,17 @@ namespace Common
         internal::CFacePtr face(mImpl, handle);
         if (face.valid()) return face->hedge;
         return HEdgeHandle();
+    }
+
+    COMMON_API std::pair<HalfEdgeMeshBase::VertexHandle, HalfEdgeMeshBase::VertexHandle> HalfEdgeMeshBase::getEdgeVertexes( EdgeHandle handle ) const
+    {
+        internal::CEdgePtr edge(mImpl, handle);
+        if (!edge.valid()) return {};
+
+        auto h1 = edge.hedge();
+        auto h2 = h1.pair();
+
+        return {h1->vertex, h2->vertex};
     }
 
 #define _IMPLEMENT_CORE_ITER( Type, name )                                                  \

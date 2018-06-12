@@ -113,6 +113,12 @@ namespace Common
         COMMON_API HalfEdgeMeshBase();
         COMMON_API virtual ~HalfEdgeMeshBase();
 
+        COMMON_API HalfEdgeMeshBase( const HalfEdgeMeshBase &copy );
+        COMMON_API HalfEdgeMeshBase( HalfEdgeMeshBase &&move );
+        
+        COMMON_API HalfEdgeMeshBase& operator = ( const HalfEdgeMeshBase &copy );
+        COMMON_API HalfEdgeMeshBase& operator = ( HalfEdgeMeshBase &&move );
+
         COMMON_API VertexHandle createVertex();
         COMMON_API EdgeHandle createEdge( VertexHandle v1, VertexHandle v2 );
         COMMON_API FaceHandle createFace( const VertexHandle *vertexes, size_t vertexCount );
@@ -131,6 +137,7 @@ namespace Common
         COMMON_API HEdgeHandle getEdgeHEdge( EdgeHandle edge ) const;
         COMMON_API HEdgeHandle getFaceHEdge( FaceHandle FaceHandle ) const;
 
+        COMMON_API std::pair<VertexHandle, VertexHandle> getEdgeVertexes( EdgeHandle edge ) const;
 
         // Iterator functions
         COMMON_API VertexRange vertexes() const;
@@ -229,6 +236,67 @@ namespace Common
         void setData( FaceHandle handle, const FaceData &data )
         {
             mFaces.set(handle, data);
+        }
+
+        bool getData( VertexHandle handle, VertexData &data )
+        {
+            return mVertexes.get(handle, data);
+        }
+        bool getData( HEdgeHandle handle, HEdgeData &data )
+        {
+            return mHEdges.get(handle, data);
+        }
+        bool getData( EdgeHandle handle, EdgeData &data )
+        {
+            return mEdges.get(handle, data);
+        }
+        bool getData( FaceHandle handle, FaceData &data )
+        {
+            return mFaces.get(handle, data);
+        }
+        
+        VertexData* findData( VertexHandle handle )
+        {
+            return mVertexes.find(handle);
+        }
+        HEdgeData* findData( HEdgeHandle handle )
+        {
+            return mHEdges.find(handle);
+        }
+        EdgeData* findData( EdgeHandle handle )
+        {
+            return mEdges.find(handle);
+        }
+        FaceData* findData( FaceHandle handle )
+        {
+            return mFaces.find(handle);
+        }
+
+    protected:
+        virtual void onVertexCreated( VertexHandle handle ) override {
+            mVertexes.allocate(handle);
+        }
+        virtual void onHEdgeCreated( HEdgeHandle handle ) override {
+            mHEdges.allocate(handle);
+        }
+        virtual void onEdgeCreated( EdgeHandle handle ) override {
+            mEdges.allocate(handle);
+        }
+        virtual void onFaceCreated( FaceHandle handle ) override {
+            mFaces.allocate(handle);
+        }
+        
+        virtual void onVertexDestroyed( VertexHandle handle ) override {
+            mVertexes.free(handle);
+        }
+        virtual void onHEdgeDestroyed( HEdgeHandle handle )override {
+            mHEdges.free(handle);
+        }
+        virtual void onEdgeDestroyed( EdgeHandle handle ) override {
+            mEdges.free(handle);
+        }
+        virtual void onFaceDestroyed( FaceHandle handle ) override {
+            mFaces.free(handle);
         }
 
     private:
