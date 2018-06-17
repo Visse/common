@@ -154,42 +154,42 @@ namespace Common
             struct CHEdgePtr {
                 CREATE_SMART_HANDLE_CONTENT(CHEdgePtr, hedges, HEdge, HEdgeHandle, const);
 
-                CHEdgePtr next() {
+                CHEdgePtr next() const {
                     if (valid()) return CHEdgePtr{impl, get()->next};
                     return CHEdgePtr();
                 }
-                CHEdgePtr prev() {
+                CHEdgePtr prev() const {
                     if (valid()) return CHEdgePtr{impl, get()->next};
                     return CHEdgePtr();
                 }
-                CHEdgePtr pair() {
+                CHEdgePtr pair() const {
                     if (valid()) return CHEdgePtr{impl, get()->pair};
                     return CHEdgePtr();
                 }
             
-                CHEdgePtr pairNext() {
+                CHEdgePtr pairNext() const {
                     if (valid()) {
                         return pair().next();
                     }
                     return CHEdgePtr();
                 }
 
-                CHEdgePtr nextPair() {
+                CHEdgePtr nextPair() const {
                     if (valid()) {
                         return next().pair();
                     }
                     return CHEdgePtr();
                 }
             
-                CVertexPtr vertex();
-                CEdgePtr edge();
-                CFacePtr face();
+                CVertexPtr vertex() const;
+                CEdgePtr edge() const;
+                CFacePtr face() const;
             };
 
             struct CVertexPtr {
                 CREATE_SMART_HANDLE_CONTENT(CVertexPtr, vertexes, Vertex, VertexHandle, const);
 
-                CHEdgePtr hedge() {
+                CHEdgePtr hedge() const {
                     if (valid()) return CHEdgePtr{impl, get()->hedge};
                     return CHEdgePtr();
                 }
@@ -198,7 +198,7 @@ namespace Common
             struct CEdgePtr {
                 CREATE_SMART_HANDLE_CONTENT(CEdgePtr, edges, Edge, EdgeHandle, const);
 
-                CHEdgePtr hedge() {
+                CHEdgePtr hedge() const {
                     if (valid()) return CHEdgePtr{impl, get()->hedge};
                     return CHEdgePtr();
                 }
@@ -207,21 +207,21 @@ namespace Common
             struct CFacePtr {
                 CREATE_SMART_HANDLE_CONTENT(CFacePtr, faces, Face, FaceHandle, const);
                 
-                CHEdgePtr hedge() {
+                CHEdgePtr hedge() const {
                     if (valid()) return CHEdgePtr{impl, get()->hedge};
                     return CHEdgePtr();
                 }
             };
 
-            inline CVertexPtr CHEdgePtr::vertex() {
+            inline CVertexPtr CHEdgePtr::vertex() const {
                 if (valid()) return CVertexPtr{impl, get()->vertex};
                 return CVertexPtr();
             }
-            inline CEdgePtr CHEdgePtr::edge() {
+            inline CEdgePtr CHEdgePtr::edge() const {
                 if (valid()) return CEdgePtr{impl, get()->edge};
                 return CEdgePtr();
             }
-            inline CFacePtr CHEdgePtr::face() {
+            inline CFacePtr CHEdgePtr::face() const {
                 if (valid()) return CFacePtr{impl, get()->face};
                 return CFacePtr();
             }
@@ -239,36 +239,36 @@ namespace Common
                     return CHEdgePtr{impl, handle, ptr, lock};
                 }
 
-                HEdgePtr next() {
+                HEdgePtr next() const {
                     if (valid()) return HEdgePtr{impl, get()->next};
                     return HEdgePtr();
                 }
-                HEdgePtr prev() {
+                HEdgePtr prev() const {
                     if (valid()) return HEdgePtr{impl, get()->prev};
                     return HEdgePtr();
                 }
-                HEdgePtr pair() {
+                HEdgePtr pair() const {
                     if (valid()) return HEdgePtr{impl, get()->pair};
                     return HEdgePtr();
                 }
             
-                HEdgePtr pairNext() {
+                HEdgePtr pairNext() const {
                     if (valid()) {
                         return pair().next();
                     }
                     return HEdgePtr();
                 }
                 
-                HEdgePtr nextPair() {
+                HEdgePtr nextPair() const {
                     if (valid()) {
                         return next().pair();
                     }
                     return HEdgePtr();
                 }
             
-                VertexPtr vertex();
-                EdgePtr edge();
-                FacePtr face();
+                VertexPtr vertex() const;
+                EdgePtr edge() const;
+                FacePtr face() const;
             };
 
             struct VertexPtr {
@@ -278,7 +278,7 @@ namespace Common
                     return CVertexPtr{impl, handle, ptr, lock};
                 }
 
-                HEdgePtr hedge() {
+                HEdgePtr hedge() const {
                     if (valid()) return HEdgePtr{impl, get()->hedge};
                     return HEdgePtr();
                 }
@@ -291,7 +291,7 @@ namespace Common
                     return CEdgePtr{impl, handle, ptr, lock};
                 }
 
-                HEdgePtr hedge() {
+                HEdgePtr hedge() const {
                     if (valid()) return HEdgePtr{impl, get()->hedge};
                     return HEdgePtr();
                 }
@@ -304,22 +304,22 @@ namespace Common
                     return CFacePtr{impl, handle, ptr, lock};
                 }
 
-                HEdgePtr hedge() {
+                HEdgePtr hedge() const {
                     if (valid()) return HEdgePtr{impl, get()->hedge};
                     return HEdgePtr();
                 }
             };
     #undef nonconst
         
-            inline VertexPtr HEdgePtr::vertex() {
+            inline VertexPtr HEdgePtr::vertex() const {
                 if (valid()) return VertexPtr{impl, get()->vertex};
                 return VertexPtr();
             }
-            inline EdgePtr HEdgePtr::edge() {
+            inline EdgePtr HEdgePtr::edge() const {
                 if (valid()) return EdgePtr{impl, get()->edge};
                 return EdgePtr();
             }
-            inline FacePtr HEdgePtr::face() {
+            inline FacePtr HEdgePtr::face() const {
                 if (valid()) return FacePtr{impl, get()->face};
                 return FacePtr();
             }
