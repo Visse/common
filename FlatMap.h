@@ -122,16 +122,16 @@ namespace Common
         iterator end() {
             return mElements.end();
         }
-        iterator begin() const {
+        const_iterator begin() const {
             return mElements.begin();
         }
-        iterator end() const {
+        const_iterator end() const {
             return mElements.end();
         }
-        iterator cbegin() const {
+        const_iterator cbegin() const {
             return mElements.begin();
         }
-        iterator cend() const {
+        const_iterator cend() const {
             return mElements.end();
         }
 
