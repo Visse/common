@@ -405,7 +405,7 @@ public:
     template< typename ...Args, bool Manual = ManualHandles >
     typename std::enable_if<Manual == false, Handle>::type
     emplace( Args&&... args ) {
-        if (mFreeListHead == mFreeListTail) {
+        if (mFreeListHead == 0) {
             if (mValues.size() >= MaxValues) return Handle();
 
             Handle handle = CreateHandle(0, (underlaying_type)mValues.size()+1, DataValue);
