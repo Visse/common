@@ -123,6 +123,54 @@ struct WrappedHandle :
     WRAP_HANDLE(Name, Type, _##Name##_Deleter, Null)
 
 
+template< typename Type, typename tag,  typename Traits >
+struct WrappedCStruct
+{
+    Type handle;
+
+    WrappedCStruct() 
+    {
+        Traits::init(&handle);
+    }
+    ~WrappedCStruct()
+    {
+        Traits::free(&handle);
+    }
+
+    WrappedCStruct( const WrappedCStruct& ) = delete;
+    WrappedCStruct& operator = ( const WrappedCStruct& ) = delete;
+    
+    WrappedCStruct( WrappedCStruct &&move ) = delete;
+    WrappedCStruct& operator = ( WrappedCStruct &&move ) = delete;
+
+    operator Type* () noexcept {
+        return &handle;
+    }
+    Type& operator * () noexcept {
+        return handle;
+    }
+    Type* operator -> () noexcept {
+        return &handle;
+    }
+};
+
+#define WRAP_CSTRUCT( Name, Type, Traits)                       \
+    struct _##Name##_tag;                                       \
+    using Name = WrappedCStruct<Type, _##Name##_tag, Traits>;
+
+#define WRAP_CSTRUCT_MEMSET_INIT( Name, Type, Free )            \
+    struct _##Name##_traits {                                   \
+        static void init( Type *handle ) {                      \
+            memset(handle, 0, sizeof(Type));                    \
+        }                                                       \
+        static void free( Type *handle ) {                      \
+            Free(handle);                                       \
+        }                                                       \
+    };                                                          \
+    WRAP_CSTRUCT(Name, Type, _##Name##_traits);
+
+
+
 template< typename Type, typename Tag, typename Traits, Type Null >
 struct RefcountedHandle :
     public HandlePointerAccess<RefcountedHandle<Type, Tag, Traits, Null>, Type>
