@@ -221,56 +221,27 @@ namespace Common
     public:
         using HalfEdgeMeshBase::HalfEdgeMeshBase;
 
-        void setData( VertexHandle handle, const VertexData &data )
-        {
-            mVertexes.set(handle, data);
-        }
-        void setData( HEdgeHandle handle, const HEdgeData &data )
-        {
-            mHEdges.set(handle, data);
-        }
-        void setData( EdgeHandle handle, const EdgeData &data )
-        {
-            mEdges.set(handle, data);
-        }
-        void setData( FaceHandle handle, const FaceData &data )
-        {
-            mFaces.set(handle, data);
-        }
 
-        bool getData( VertexHandle handle, VertexData &data )
-        {
-            return mVertexes.get(handle, data);
+
+#define _CREATE_DATA_METHODS(Handle, Type, member)          \
+        void setData( Handle handle, const Type &data ) {   \
+            member.set(handle, data);                       \
+        }                                                   \
+        bool getData( Handle handle, Type &data ) const {   \
+            return member.get(handle,data);                 \
+        }                                                   \
+        Type* findData( Handle handle ) {                   \
+            return member.find(handle);                     \
+        }                                                   \
+        const Type* findData( Handle handle ) const {       \
+            return member.find(handle);                     \
         }
-        bool getData( HEdgeHandle handle, HEdgeData &data )
-        {
-            return mHEdges.get(handle, data);
-        }
-        bool getData( EdgeHandle handle, EdgeData &data )
-        {
-            return mEdges.get(handle, data);
-        }
-        bool getData( FaceHandle handle, FaceData &data )
-        {
-            return mFaces.get(handle, data);
-        }
-        
-        VertexData* findData( VertexHandle handle )
-        {
-            return mVertexes.find(handle);
-        }
-        HEdgeData* findData( HEdgeHandle handle )
-        {
-            return mHEdges.find(handle);
-        }
-        EdgeData* findData( EdgeHandle handle )
-        {
-            return mEdges.find(handle);
-        }
-        FaceData* findData( FaceHandle handle )
-        {
-            return mFaces.find(handle);
-        }
+        _CREATE_DATA_METHODS(VertexHandle, VertexData, mVertexes);
+        _CREATE_DATA_METHODS(HEdgeHandle, HEdgeData, mHEdges);
+        _CREATE_DATA_METHODS(EdgeHandle, EdgeData, mEdges);
+        _CREATE_DATA_METHODS(FaceHandle, FaceData, mFaces);
+#undef _CREATE_DATA_METHODS
+
 
     protected:
         virtual void onVertexCreated( VertexHandle handle ) override {
