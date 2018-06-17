@@ -580,6 +580,7 @@ namespace Common
     _IMPLEMENT_HEDGE_ITER(FaceVertex, faceVertexes, FaceHandle);
     _IMPLEMENT_HEDGE_ITER(FaceHEdge, faceHEdges, FaceHandle);
     _IMPLEMENT_HEDGE_ITER(FaceEdge, faceEdges, FaceHandle);
+    _IMPLEMENT_HEDGE_ITER(FaceFace, faceFaces, FaceHandle);
 
 #undef _IMPLEMENT_HEDGE_ITER
 

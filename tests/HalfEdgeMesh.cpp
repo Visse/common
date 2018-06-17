@@ -64,12 +64,14 @@ void verifyMesh( const HalfEdgeMesh &mesh,
         REQUIRE(edge);
 
         for (int i=1; i <= face.vertexes.size(); ++i) {
+            REQUIRE(mesh.getHEdgeFace(edge) == face.handle);
             HalfEdgeMesh::VertexHandle vertex = face.vertexes[i % face.vertexes.size()];
 
             HalfEdgeMesh::VertexHandle edgeVert = mesh.getHEdgeVertex(edge);
             REQUIRE(edgeVert == vertex);
 
             edge = mesh.getHEdgeNext(edge);
+            REQUIRE(edge);
         }
     }
     SECTION("Iterators")
@@ -233,6 +235,86 @@ void verifyMesh( const HalfEdgeMesh &mesh,
                 }
             }
         }
+        { // FaceVertex
+            for (const FaceInfo &info : faces) {
+                std::set<VertexHandle> visited;
+                for (auto handle : mesh.faceVertexes(info.handle)) {
+                    REQUIRE(visited.count(handle) == 0);
+                    visited.insert(handle);
+                }
+
+                REQUIRE(visited.size() == info.vertexes.size());
+                for (const auto &handle : info.vertexes) {
+                    REQUIRE(visited.count(handle) == 1);
+                }
+            }
+        }
+        { // FaceHEdge
+            for (const FaceInfo &info : faces) {
+                std::set<HEdgeHandle> visited;
+                for (auto handle : mesh.faceHEdges(info.handle)) {
+                    REQUIRE(visited.count(handle) == 0);
+                    visited.insert(handle);
+                }
+
+                REQUIRE(visited.size() == info.vertexes.size());
+                for (size_t i=0, s=info.vertexes.size(); i < s; ++i) {
+                    HEdgeHandle handle = mesh.findHEdge(info.vertexes[i], info.vertexes[(i+1)%s]);
+                    REQUIRE (handle);
+                    REQUIRE(visited.count(handle) == 1);
+                }
+            }
+        }
+        { // FaceEdge
+            for (const FaceInfo &info : faces) {
+                std::set<EdgeHandle> visited;
+                for (auto handle : mesh.faceEdges(info.handle)) {
+                    REQUIRE(visited.count(handle) == 0);
+                    visited.insert(handle);
+                }
+
+                REQUIRE(visited.size() == info.vertexes.size());
+                for (size_t i=0, s=info.vertexes.size(); i < s; ++i) {
+                    EdgeHandle handle = mesh.findEdge(info.vertexes[i], info.vertexes[(i+1)%s]);
+                    REQUIRE (handle);
+                    REQUIRE(visited.count(handle) == 1);
+                }
+            }
+        }
+        { // FaceFace 
+            for (const FaceInfo &info : faces) {
+                std::set<FaceHandle> neighbors;
+                
+                for (size_t i=0, s=info.vertexes.size(); i < s; ++i) {
+                    VertexHandle v1 = info.vertexes[i],
+                                 v2 = info.vertexes[(i+1)%s];
+
+                    for (const FaceInfo &face : faces) {
+                        if (face.handle == info.handle) continue;
+
+                        for (size_t a=0,b=face.vertexes.size(); a < b; ++a) {
+                            if (face.vertexes[a] == v2 && face.vertexes[(a+1)%b] == v1) {
+                                REQUIRE(neighbors.count(face.handle) == 0);
+                                neighbors.insert(face.handle);
+                            }
+                        }
+                    }
+                }
+
+
+                std::set<FaceHandle> visited;
+                for (FaceHandle handle : mesh.faceFaces(info.handle)) {
+                    REQUIRE(handle);
+                    REQUIRE(visited.count(handle) == 0);
+                    visited.insert(handle);
+                }
+                
+                REQUIRE(visited.size() == neighbors.size());
+                for (auto handle : neighbors) {
+                    REQUIRE(visited.count(handle) == 1);
+                }
+            }
+        }
     }
 }
 
@@ -303,17 +385,23 @@ TEST_CASE( "HalfEdgeMesh", "[Common][HalfEdgeMesh]" )
 
         REQUIRE(e1);
         REQUIRE(e2);
-
+#if COMMON_DEBUG_LEVEL > 0
+        mesh.verifyInvariants();
+#endif
         auto f1Vertexes = {v1, v2, v3};
         auto f1 = mesh.createFace(f1Vertexes.begin(), f1Vertexes.size());
         REQUIRE(f1);
+#if COMMON_DEBUG_LEVEL > 0
         mesh.verifyInvariants();
+#endif
 
         auto f2Vertexes = {v1, v4, v5};
         auto f2 = mesh.createFace(f2Vertexes.begin(), f2Vertexes.size());
         REQUIRE(f2);
             
+#if COMMON_DEBUG_LEVEL > 0
         mesh.verifyInvariants();
+#endif
         /*
                   3   6  4
                   | \ | /   \ <=f2
@@ -335,7 +423,7 @@ TEST_CASE( "HalfEdgeMesh", "[Common][HalfEdgeMesh]" )
         verifyMesh(mesh,
             {v1, v2, v3, v4, v5, v6},
             {{e1,v1, v2}, {{}, v2, v3}, {{}, v3,v1}, {e2, v1, v6}, {{}, v1, v4}, {{}, v4, v5}, {{}, v1, v5}, {{}, v5, v2}, {{}, v3, v4}},
-            {{f1, {v1, v2, v3}}, {f2, {v1, v4, v5}}, {f3, {v1, v3, v4}}}
+            {{f1, {v1, v2, v3}}, {f2, {v1, v4, v5}}, {f3, {v2, v1, v5}}}
         );
 
 #if COMMON_DEBUG_LEVEL > 0

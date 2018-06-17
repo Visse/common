@@ -236,7 +236,27 @@ namespace Common
 
             COMMON_API void increment();
         };
+
+        class FaceFaceIterator :
+            public IteratorAdopter<FaceFaceIterator, FaceHandle, std::forward_iterator_tag>
+        {
+            struct Impl;
+            PImplHelper<Impl, 40> mImpl;
+        public:
+            COMMON_API FaceFaceIterator( const HalfEdgeMeshBase &mesh, FaceHandle face );
+            COMMON_API FaceFaceIterator( EndIterator end );
+            COMMON_API ~FaceFaceIterator();
+
+            COMMON_API FaceFaceIterator( const FaceFaceIterator &copy );
+            COMMON_API FaceFaceIterator& operator = ( const FaceFaceIterator &copy );
+
+            COMMON_API bool equal( const FaceFaceIterator &other ) const;
+            COMMON_API FaceHandle dereference() const;
+
+            COMMON_API void increment();
+        };
     
+
 #define _IMPLEMENT_RANGE(Type, Iter)                    \
         class Type {                                    \
             Iter mBeg, mEnd;                            \
@@ -270,6 +290,7 @@ namespace Common
         _IMPLEMENT_RANGE(FaceVertexRange, FaceVertexIterator);
         _IMPLEMENT_RANGE(FaceHEdgeRange, FaceHEdgeIterator);
         _IMPLEMENT_RANGE(FaceEdgeRange, FaceEdgeIterator);
+        _IMPLEMENT_RANGE(FaceFaceRange, FaceFaceIterator);
 
 #undef _IMPLEMENT_RANGE
     }

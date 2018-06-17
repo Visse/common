@@ -41,6 +41,7 @@ namespace Common
         class FaceVertexIterator;
         class FaceHEdgeIterator;
         class FaceEdgeIterator;
+        class FaceFaceIterator;
 
 
         // special range class for use in for-range constructs
@@ -57,6 +58,7 @@ namespace Common
         class FaceVertexRange;
         class FaceHEdgeRange;
         class FaceEdgeRange;
+        class FaceFaceRange;
     }
 
     class HalfEdgeMeshBase {
@@ -93,6 +95,8 @@ namespace Common
         using FaceHEdgeIterator    = HalfEdgeMeshIterators::FaceHEdgeIterator;
         // Iterates over the edges that make up the given face
         using FaceEdgeIterator     = HalfEdgeMeshIterators::FaceEdgeIterator;
+        // Iterates over neighboring faces for the given face
+        using FaceFaceIterator     = HalfEdgeMeshIterators::FaceFaceIterator;
 
 
         using VertexRange = HalfEdgeMeshIterators::VertexRange;
@@ -108,6 +112,7 @@ namespace Common
         using FaceVertexRange = HalfEdgeMeshIterators::FaceVertexRange;
         using FaceHEdgeRange  = HalfEdgeMeshIterators::FaceHEdgeRange;
         using FaceEdgeRange   = HalfEdgeMeshIterators::FaceEdgeRange;
+        using FaceFaceRange   = HalfEdgeMeshIterators::FaceFaceRange;
 
     public:
         COMMON_API HalfEdgeMeshBase();
@@ -185,6 +190,10 @@ namespace Common
         COMMON_API FaceEdgeRange faceEdges( FaceHandle face ) const;
         COMMON_API FaceEdgeIterator faceEdgesBegin( FaceHandle face ) const;
         COMMON_API FaceEdgeIterator faceEdgesEnd( FaceHandle face ) const;
+
+        COMMON_API FaceFaceRange faceFaces( FaceHandle face ) const;
+        COMMON_API FaceFaceIterator faceFacesBegin( FaceHandle face ) const;
+        COMMON_API FaceFaceIterator faceFacesEnd( FaceHandle face ) const;
 
         // Debuging functions
 #if COMMON_DEBUG_LEVEL > 0

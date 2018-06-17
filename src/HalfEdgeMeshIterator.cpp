@@ -65,11 +65,19 @@ namespace Common
                 return;                                                             \
             }                                                                       \
             mImpl->hedge = head.hedge();                                            \
-            mImpl->head = head->hedge;                                              \
             if (!mImpl->hedge) {                                                    \
                 mImpl->lap = 1;                                                     \
                 return;                                                             \
             }                                                                       \
+            while (!(mImpl->hedge get)) {                                           \
+                mImpl->hedge = mImpl->hedge inc;                                    \
+                if (mImpl->hedge == head->hedge) {                                  \
+                    mImpl->lap = 1;                                                 \
+                    mImpl->hedge = CHEdgePtr();                                     \
+                    break;                                                          \
+                }                                                                   \
+            }                                                                       \
+            mImpl->head = mImpl->hedge;                                             \
         }                                                                           \
         COMMON_API Type::Type( EndIterator end ) {                                  \
             mImpl->lap = 1;                                                         \
@@ -97,8 +105,13 @@ namespace Common
         }                                                                           \
         COMMON_API void Type::increment() {                                         \
             if (!mImpl->hedge) return;                                              \
-            mImpl->hedge = mImpl->hedge inc;                                        \
-            if (mImpl->hedge == mImpl->head) mImpl->lap++;                          \
+            do {                                                                    \
+                mImpl->hedge = mImpl->hedge inc;                                    \
+                if (mImpl->hedge == mImpl->head) {                                  \
+                    mImpl->lap++;                                                   \
+                    return;                                                         \
+                }                                                                   \
+            } while (!(mImpl->hedge get));                                          \
         }
         
         IMPLEMENT_HEDGE_ITER(VertexVertexIterator, CVertexPtr, VertexHandle, VertexHandle, .pairNext(), ->vertex);
@@ -109,6 +122,8 @@ namespace Common
         IMPLEMENT_HEDGE_ITER(FaceVertexIterator, CFacePtr, FaceHandle, VertexHandle, .next(), ->vertex);
         IMPLEMENT_HEDGE_ITER(FaceHEdgeIterator, CFacePtr, FaceHandle, HEdgeHandle, .next(), .handle);
         IMPLEMENT_HEDGE_ITER(FaceEdgeIterator, CFacePtr, FaceHandle, EdgeHandle, .next(), ->edge);
+
+        IMPLEMENT_HEDGE_ITER(FaceFaceIterator, CFacePtr, FaceHandle, FaceHandle, .next(), .pair()->face);
 
 #undef IMPLEMENT_HEDGE_ITER
     }
