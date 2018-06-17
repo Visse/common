@@ -45,6 +45,17 @@ namespace Common
         FlatMap& operator = ( const FlatMap& ) = default;
         FlatMap& operator = ( FlatMap&& ) = default;
 
+        FlatMap& operator = ( const vector_type &elements ) {
+            mElements = elements;
+            std::sort(mElements.begin(), mElements.end(), KeyComp());
+            return *this;
+        }
+        FlatMap& operator = ( vector_type &&elements ) {
+            mElements = std::move(elements);
+            std::sort(mElements.begin(), mElements.end(), KeyComp());
+            return *this;
+        }
+
         template< typename... Args >
         iterator emplace( Args&&... args ) {
             value_type value(std::forward<Args>(args)...);
