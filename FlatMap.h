@@ -5,7 +5,7 @@
 
 namespace Common
 {
-    template< typename Key, typename Value >
+    template< typename Key, typename Value, typename Comp = std::less<Key>>
     class FlatMap {
     public:
         using value_type = std::pair<Key, Value>;
@@ -16,16 +16,16 @@ namespace Common
 
         struct KeyComp {
             bool operator () (const Key &lhs, const Key &rhs) const {
-                return lhs < rhs;   
+                return Comp()(lhs, rhs); 
             }
             bool operator () (const value_type &lhs, const Key &rhs) const {
-                return lhs.first < rhs;
+                return Comp()(lhs.first, rhs);
             }
             bool operator () (const Key &lhs, const value_type &rhs) const {
-                return lhs < rhs.first;
+                return Comp()(lhs, rhs.first);
             }
             bool operator () (const value_type &lhs, const value_type &rhs) const {
-                return lhs.first < rhs.first;
+                return Comp()(lhs.first, rhs.first);
             }
         };
 
