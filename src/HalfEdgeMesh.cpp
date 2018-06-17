@@ -543,6 +543,23 @@ namespace Common
         return {h1->vertex, h2->vertex};
     }
 
+    COMMON_API bool HalfEdgeMeshBase::isBorderFace( FaceHandle handle ) const
+    {
+        internal::CFacePtr face(mImpl, handle);
+        if (!face.valid()) return false;
+
+        internal::CHEdgePtr hedge = face.hedge();
+
+        do {
+            internal::CHEdgePtr pair = hedge.pair();
+            if (!pair->face) return true;
+            
+            hedge = hedge.next();
+        } while (hedge != face->hedge);
+
+        return false;
+    }
+
 #define _IMPLEMENT_CORE_ITER( Type, name )                                                  \
     COMMON_API HalfEdgeMeshBase::Type##Range HalfEdgeMeshBase::name() const {               \
         return Type##Range{name##Begin(), name##End()};                                     \

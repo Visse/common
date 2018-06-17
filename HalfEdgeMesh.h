@@ -142,9 +142,13 @@ namespace Common
 
         COMMON_API HEdgeHandle getVertexHEdge( VertexHandle vertex ) const;
         COMMON_API HEdgeHandle getEdgeHEdge( EdgeHandle edge ) const;
-        COMMON_API HEdgeHandle getFaceHEdge( FaceHandle FaceHandle ) const;
+        COMMON_API HEdgeHandle getFaceHEdge( FaceHandle face ) const;
 
         COMMON_API std::pair<VertexHandle, VertexHandle> getEdgeVertexes( EdgeHandle edge ) const;
+
+        // Tests if the face is on the border,
+        //  A face is on the border if its has edges without neighbors
+        COMMON_API bool isBorderFace( FaceHandle face ) const;
 
         // Iterator functions
         COMMON_API VertexRange vertexes() const;
