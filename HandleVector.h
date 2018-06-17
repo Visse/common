@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <type_traits>
-
+#include <cassert>
 
 static constexpr const unsigned HANDLE_VECTOR_DEFAULT = (unsigned)-1;
 template< typename Handle, typename Value, unsigned GenerationBits_=HANDLE_VECTOR_DEFAULT, unsigned DataBits_=HANDLE_VECTOR_DEFAULT, typename Handle::underlaying_type DataValue_=0, bool ManualHandels_=false > 
@@ -474,6 +474,26 @@ public:
         }
         
         return true;
+    }
+
+    // Free's all handles
+    void clear()
+    {
+        underlaying_type index = 1;
+        for (auto &entry : mValues) {
+            index++;
+            if (!IsHandleFree(entry.handle)) {
+                entry.destroy();
+            }
+            
+            entry.handle = CreateHandle(0, index, FreeDataValue);
+        }
+
+        if (ManualHandles == false) {
+            mFreeListHead = 1;
+            mFreeListTail = (underlaying_type)mValues.size();
+            mValues.back().handle = CreateHandle(0,0,FreeDataValue);
+        }
     }
 
     bool valid( Handle handle )const  {

@@ -277,6 +277,41 @@ TEST_CASE( "HandleVector", "[Common][HandleVector]" )
                 REQUIRE(handles[handle] == i);
             }
         }
+    
+        SECTION("Clear") {
+            std::vector<TestHandle> handles;
+            for (int i=0; i < 1000; ++i) {
+                auto handle = vector.create(i);
+                REQUIRE((bool)handle);
+                handles.push_back(handle);
+            }
+            size_t size = vector.underlying_size();
+
+            srand(123);
+            for (int i=0; i < 500; ++i) {
+                int idx = rand() % handles.size();
+                auto iter = handles.begin() + idx;
+
+                vector.free(*iter);
+                handles.erase(iter);
+            }
+
+            vector.clear();
+            handles.clear();
+
+
+            std::set<TestHandle> existing;
+            for (int i=0; i < 1000; ++i) {
+                auto handle = vector.create(i);
+                REQUIRE((bool)handle);
+                REQUIRE(vector.valid(handle));
+                REQUIRE(existing.count(handle) == 0);
+                existing.insert(handle);
+            }
+
+            REQUIRE(vector.underlying_size() == size);
+            vector.clear();
+        }
     }
 
     SECTION("Iterators")
