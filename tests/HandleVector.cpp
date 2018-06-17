@@ -280,6 +280,10 @@ TEST_CASE( "HandleVector", "[Common][HandleVector]" )
     
         SECTION("Clear") {
             std::vector<TestHandle> handles;
+
+            // clear a empty vector
+            vector.clear();
+
             for (int i=0; i < 1000; ++i) {
                 auto handle = vector.create(i);
                 REQUIRE((bool)handle);

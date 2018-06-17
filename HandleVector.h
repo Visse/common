@@ -479,6 +479,8 @@ public:
     // Free's all handles
     void clear()
     {
+        if (mValues.empty()) return;
+
         underlaying_type index = 1;
         for (auto &entry : mValues) {
             index++;
