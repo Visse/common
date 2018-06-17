@@ -382,6 +382,8 @@ namespace Common
         void init( Impl *impl, HalfEdgeMeshBase *this_ );
         void destroy( Impl *impl );
 
+        void clear( Impl *impl );
+
         VertexHandle createVertex( Impl *impl );
 
         CHEdgePtr findFreeHEdge( const Impl *impl, CHEdgePtr hedge );

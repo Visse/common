@@ -27,6 +27,19 @@ namespace Common
         void destroy( Impl *impl )
         {}
 
+        void clear( Impl *impl )
+        {
+            impl->vertexes.clear();
+            impl->hedges.clear();
+            impl->edges.clear();
+            impl->faces.clear();
+
+            impl->vertexesLock++;
+            impl->hedgesLock++;
+            impl->edgesLock++;
+            impl->facesLock++;
+        }
+
         VertexHandle createVertex( Impl *impl )
         {
             VertexHandle handle = allocateVertex(impl);
@@ -413,6 +426,11 @@ namespace Common
         *mImpl = std::move(*move.mImpl);
         mImpl->this_ = this;
         return *this;
+    }
+
+    COMMON_API void HalfEdgeMeshBase::clear()
+    {
+        internal::clear(mImpl);
     }
 
     COMMON_API HalfEdgeMeshBase::VertexHandle HalfEdgeMeshBase::createVertex()

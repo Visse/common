@@ -119,6 +119,8 @@ namespace Common
         COMMON_API HalfEdgeMeshBase& operator = ( const HalfEdgeMeshBase &copy );
         COMMON_API HalfEdgeMeshBase& operator = ( HalfEdgeMeshBase &&move );
 
+        COMMON_API void clear();
+
         COMMON_API VertexHandle createVertex();
         COMMON_API EdgeHandle createEdge( VertexHandle v1, VertexHandle v2 );
         COMMON_API FaceHandle createFace( const VertexHandle *vertexes, size_t vertexCount );
@@ -205,6 +207,8 @@ namespace Common
         COMMON_API virtual void onEdgeDestroyed( EdgeHandle handle ) {}
         COMMON_API virtual void onFaceDestroyed( FaceHandle handle ) {}
 
+        COMMON_API virtual void onClear() {}
+
     private:
         friend struct internal::HalfEdgeMeshBaseImpl;
 
@@ -268,6 +272,13 @@ namespace Common
         }
         virtual void onFaceDestroyed( FaceHandle handle ) override {
             mFaces.free(handle);
+        }
+
+        virtual void onClear() override {
+            mVertexes.clear();
+            mHEdges.clear();
+            mEdges.clear();
+            mFaces.clear();
         }
 
     private:
