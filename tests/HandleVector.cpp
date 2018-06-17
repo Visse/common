@@ -217,7 +217,7 @@ TEST_CASE( "HandleVector", "[Common][HandleVector]" )
             }
 
             INFO("Iterations before handle repeat: "<< i << " - effective generation bits: " << std::log(i)/std::log(2) << ", expected " << vector.GenerationBits);
-            REQUIRE((1<<vector.GenerationBits) < i);
+            REQUIRE((1<<vector.GenerationBits) <= i);
         }
 
         SECTION("DataValue") 
