@@ -50,7 +50,7 @@ namespace Common
         return StringId(handle);
     }
     
-    const char* GetCString( StringId id )
+    const char* GetCString( const StringId &id )
     {
         const char *str = strpool_cstr(strpool, id.handle);
         if (str) return str;

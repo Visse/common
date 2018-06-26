@@ -17,7 +17,7 @@ namespace Common
     WRAP_REFCOUNTED_HANDLE_FUNC(StringId, uint64_t, internal::incRef, internal::decRef, 0);
 
     COMMON_API StringId CreateStringId( const char *str, size_t len);
-    COMMON_API const char* GetCString( StringId id );
+    COMMON_API const char* GetCString( const StringId &id );
 
 
     inline StringId CreateStringId( const char *str )
