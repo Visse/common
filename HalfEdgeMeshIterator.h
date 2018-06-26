@@ -180,6 +180,25 @@ namespace Common
             COMMON_API void increment();
         };
 
+        class VertexFaceIterator :
+            public IteratorAdopter<VertexFaceIterator, FaceHandle, std::forward_iterator_tag>
+        {
+            struct Impl;
+            PImplHelper<Impl, 40> mImpl;
+        public:
+            COMMON_API VertexFaceIterator( const HalfEdgeMeshBase &mesh, VertexHandle vertex );
+            COMMON_API VertexFaceIterator( EndIterator end );
+            COMMON_API ~VertexFaceIterator();
+
+            COMMON_API VertexFaceIterator( const VertexFaceIterator &copy );
+            COMMON_API VertexFaceIterator& operator = ( const VertexFaceIterator &copy );
+
+            COMMON_API bool equal( const VertexFaceIterator &other ) const;
+            COMMON_API FaceHandle dereference() const;
+
+            COMMON_API void increment();
+        };
+
         class FaceVertexIterator :
             public IteratorAdopter<FaceVertexIterator, VertexHandle, std::forward_iterator_tag>
         {
@@ -285,6 +304,7 @@ namespace Common
         _IMPLEMENT_RANGE(VertexOHEdgeRange, VertexOHEdgeIterator);
         _IMPLEMENT_RANGE(VertexIHEdgeRange, VertexIHEdgeIterator);
         _IMPLEMENT_RANGE(VertexEdgeRange, VertexEdgeIterator);
+        _IMPLEMENT_RANGE(VertexFaceRange, VertexFaceIterator);
 
         
         _IMPLEMENT_RANGE(FaceVertexRange, FaceVertexIterator);

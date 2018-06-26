@@ -118,6 +118,7 @@ namespace Common
         IMPLEMENT_HEDGE_ITER(VertexOHEdgeIterator, CVertexPtr, VertexHandle, HEdgeHandle, .pairNext(), .handle);
         IMPLEMENT_HEDGE_ITER(VertexIHEdgeIterator, CVertexPtr, VertexHandle, HEdgeHandle, .pairNext(), ->pair);
         IMPLEMENT_HEDGE_ITER(VertexEdgeIterator, CVertexPtr, VertexHandle, EdgeHandle, .pairNext(), ->edge);
+        IMPLEMENT_HEDGE_ITER(VertexFaceIterator, CVertexPtr, VertexHandle, FaceHandle, .pairNext(), ->face);
         
         IMPLEMENT_HEDGE_ITER(FaceVertexIterator, CFacePtr, FaceHandle, VertexHandle, .next(), ->vertex);
         IMPLEMENT_HEDGE_ITER(FaceHEdgeIterator, CFacePtr, FaceHandle, HEdgeHandle, .next(), .handle);

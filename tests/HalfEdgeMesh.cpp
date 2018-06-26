@@ -235,6 +235,31 @@ void verifyMesh( const HalfEdgeMesh &mesh,
                 }
             }
         }
+        { // VertexFace
+            for (VertexHandle vertex : vertexes) {
+                std::vector<FaceHandle> handles;
+
+                for (const auto &face : faces) {
+                    for (VertexHandle handle : face.vertexes) {
+                        if (vertex == handle) {
+                            handles.push_back(face.handle);
+                            break;
+                        }
+                    }
+                }
+
+                std::set<FaceHandle> visited;
+                for (auto handle : mesh.vertexFaces(vertex)) {
+                    REQUIRE(visited.count(handle) == 0);
+                    visited.insert(handle);
+                }
+                
+                REQUIRE(visited.size() == handles.size());
+                for (const auto &handle : handles) {
+                    REQUIRE(visited.count(handle) == 1);
+                }
+            }
+        }
         { // FaceVertex
             for (const FaceInfo &info : faces) {
                 std::set<VertexHandle> visited;

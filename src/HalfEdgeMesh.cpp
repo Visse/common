@@ -604,6 +604,7 @@ namespace Common
     _IMPLEMENT_HEDGE_ITER(VertexOHEdge, vertexOHEdges, VertexHandle);
     _IMPLEMENT_HEDGE_ITER(VertexIHEdge, vertexIHEdges, VertexHandle);
     _IMPLEMENT_HEDGE_ITER(VertexEdge, vertexEdges, VertexHandle);
+    _IMPLEMENT_HEDGE_ITER(VertexFace, vertexFaces, VertexHandle);
 
     _IMPLEMENT_HEDGE_ITER(FaceVertex, faceVertexes, FaceHandle);
     _IMPLEMENT_HEDGE_ITER(FaceHEdge, faceHEdges, FaceHandle);

@@ -37,6 +37,7 @@ namespace Common
         class VertexOHEdgeIterator;
         class VertexIHEdgeIterator;
         class VertexEdgeIterator;
+        class VertexFaceIterator;
 
         class FaceVertexIterator;
         class FaceHEdgeIterator;
@@ -54,6 +55,7 @@ namespace Common
         class VertexOHEdgeRange;
         class VertexIHEdgeRange;
         class VertexEdgeRange;
+        class VertexFaceRange;
 
         class FaceVertexRange;
         class FaceHEdgeRange;
@@ -88,6 +90,8 @@ namespace Common
         using VertexIHEdgeIterator = HalfEdgeMeshIterators::VertexIHEdgeIterator;
         // Iterates over the outgoing half edges for a given vertex
         using VertexEdgeIterator   = HalfEdgeMeshIterators::VertexEdgeIterator;
+        // Iterates over all faces sharing this vertex
+        using VertexFaceIterator   = HalfEdgeMeshIterators::VertexFaceIterator;
 
         // Iterates over the vertexes that make up the given face
         using FaceVertexIterator   = HalfEdgeMeshIterators::FaceVertexIterator;
@@ -108,6 +112,7 @@ namespace Common
         using VertexOHEdgeRange = HalfEdgeMeshIterators::VertexOHEdgeRange;
         using VertexIHEdgeRange = HalfEdgeMeshIterators::VertexIHEdgeRange;
         using VertexEdgeRange   = HalfEdgeMeshIterators::VertexEdgeRange;
+        using VertexFaceRange   = HalfEdgeMeshIterators::VertexFaceRange;
 
         using FaceVertexRange = HalfEdgeMeshIterators::FaceVertexRange;
         using FaceHEdgeRange  = HalfEdgeMeshIterators::FaceHEdgeRange;
@@ -184,6 +189,10 @@ namespace Common
         COMMON_API VertexEdgeRange vertexEdges( VertexHandle vertex ) const;
         COMMON_API VertexEdgeIterator vertexEdgesBegin( VertexHandle vertex ) const;
         COMMON_API VertexEdgeIterator vertexEdgesEnd( VertexHandle vertex ) const;
+
+        COMMON_API VertexFaceRange vertexFaces( VertexHandle vertex ) const;
+        COMMON_API VertexFaceIterator vertexFacesBegin( VertexHandle vertex ) const;
+        COMMON_API VertexFaceIterator vertexFacesEnd( VertexHandle vertex ) const;
 
         COMMON_API FaceVertexRange faceVertexes( FaceHandle face ) const;
         COMMON_API FaceVertexIterator faceVertexesBegin( FaceHandle face ) const;
