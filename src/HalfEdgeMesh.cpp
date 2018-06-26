@@ -543,6 +543,17 @@ namespace Common
         return {h1->vertex, h2->vertex};
     }
 
+    COMMON_API std::pair<HalfEdgeMeshBase::FaceHandle, HalfEdgeMeshBase::FaceHandle> HalfEdgeMeshBase::getEdgeFaces( EdgeHandle handle ) const
+    {
+        internal::CEdgePtr edge(mImpl, handle);
+        if (!edge.valid()) return {};
+
+        auto h1 = edge.hedge();
+        auto h2 = h1.pair();
+
+        return {h1->face, h2->face};
+    }
+
     COMMON_API bool HalfEdgeMeshBase::isBorderFace( FaceHandle handle ) const
     {
         internal::CFacePtr face(mImpl, handle);

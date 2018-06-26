@@ -145,6 +145,8 @@ namespace Common
         COMMON_API HEdgeHandle getFaceHEdge( FaceHandle face ) const;
 
         COMMON_API std::pair<VertexHandle, VertexHandle> getEdgeVertexes( EdgeHandle edge ) const;
+        // The face handles may be null.
+        COMMON_API std::pair<FaceHandle, FaceHandle> getEdgeFaces( EdgeHandle edge ) const;
 
         // Tests if the face is on the border,
         //  A face is on the border if its has edges without neighbors
