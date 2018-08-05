@@ -29,4 +29,10 @@ TEST_CASE( "HashTable", "[Common][HashTable]" )
         REQUIRE(hashtable.find(v) != nullptr);
         REQUIRE(*hashtable.find(v) == v);
     }
+
+    hashtable.clear();
+    
+    for (int &v : values) {
+        REQUIRE(hashtable.find(v) == nullptr);
+    }
 }

@@ -41,5 +41,10 @@ namespace Common
         {
             return hashtable_remove(&mImpl->hashtable, hash);
         }
+
+        COMMON_API void HashTableBase::clear() 
+        {
+            return hashtable_clear(&mImpl->hashtable);
+        }
     }
 }

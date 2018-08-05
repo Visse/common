@@ -25,6 +25,8 @@ namespace Common
             COMMON_API bool insert( uint64_t hash, const void *item );
             COMMON_API void* find( uint64_t hash );
             COMMON_API void remove( uint64_t hash );
+
+            COMMON_API void clear();
         };
     }
 
@@ -59,6 +61,10 @@ namespace Common
 
         Value* find( uint64_t hash ) {
             return (Value*)HashTableBase::find(hash);
+        }
+
+        void clear() {
+            return HashTableBase::clear();
         }
     };
 }
