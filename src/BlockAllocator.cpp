@@ -64,6 +64,11 @@ namespace Common
             }
         }
 
+        void clear( Impl *impl )
+        {
+            std::memset(impl->blockInfo, 0, requiredMetadataSize(impl->blockCount));
+        }
+
         bool isFree( Impl *impl, size_t block ) {
             assert (block < impl->blockCount);
             return DynamicBitUtility::getBit(impl->blockInfo, block*2 + 0) == 0;
@@ -213,6 +218,12 @@ namespace Common
     {
         return impl::free(mImpl, ptr);
     }
+    
+    COMMON_API void BlockAllocator::clear()
+    {
+        return impl::clear(mImpl);
+    }
+
     COMMON_API void BlockAllocator::cloneAllocationsFrom( const BlockAllocator &other )
     {
         impl::cloneAllocationsFrom(mImpl, other.mImpl);

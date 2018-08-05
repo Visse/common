@@ -31,6 +31,18 @@ TEST_CASE( "BlockAllocator", "[Common][BlockAllocator]" )
                     uintptr_t ptr = allocator.allocate(blockSize);
                     REQUIRE(ptr == BlockAllocator::NULL_PTR);
 
+                    allocator.clear();
+                    
+                    for (int i=0; i < blockCount; ++i) {
+                        uintptr_t ptr = allocator.allocate(blockSize);
+                        REQUIRE(ptr != BlockAllocator::NULL_PTR);
+                        ptrs.push_back(ptr);
+                    }
+
+                    // at this point the allocator should be full
+                    ptr = allocator.allocate(blockSize);
+                    REQUIRE(ptr == BlockAllocator::NULL_PTR);
+
                     // Free all ptrs
                     for (auto ptr : ptrs) {
                         allocator.free(ptr);

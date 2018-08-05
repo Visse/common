@@ -24,6 +24,8 @@ namespace Common
         COMMON_API virtual uintptr_t allocate( size_t size ) override;
         COMMON_API virtual void free( uintptr_t ptr ) override;
 
+        COMMON_API void clear();
+
         // Clones all allocations from 'other'
         //  Ex: if other has allocated block 1 to 10, 
         //      this marks block 1 to 10 in this allocator as allocated
