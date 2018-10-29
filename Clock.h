@@ -66,6 +66,7 @@ public:
     }
     
 private:
-    TimePoint mStartPoint, mPausedPoint;
+    TimePoint mStartPoint = ClockType::now(), 
+              mPausedPoint;
     bool mIsPaused = false;
 };
