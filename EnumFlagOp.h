@@ -26,6 +26,24 @@
             ~std::underlying_type<enum>::type(e1)                   \
         );                                                          \
     }                                                               \
+    inline static constexpr enum operator |= ( enum &e1, enum e2 ) {\
+        return e1 = static_cast<enum>(                              \
+            std::underlying_type<enum>::type(e1) |                  \
+            std::underlying_type<enum>::type(e2)                    \
+        );                                                          \
+    }                                                               \
+    inline static constexpr enum operator &= ( enum &e1, enum e2 ) {\
+        return e1 = static_cast<enum>(                              \
+            std::underlying_type<enum>::type(e1) &                  \
+            std::underlying_type<enum>::type(e2)                    \
+        );                                                          \
+    }                                                               \
+    inline static constexpr enum operator ^= ( enum &e1, enum e2 ) {\
+        return e1 = static_cast<enum>(                              \
+            std::underlying_type<enum>::type(e1) ^                  \
+            std::underlying_type<enum>::type(e2)                    \
+        );                                                          \
+    }                                                               \
     inline static constexpr bool any( enum e, enum flags ) {        \
         return std::underlying_type<enum>::type(e&flags) != 0;      \
     }                                                               \
